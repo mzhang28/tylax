@@ -584,11 +584,10 @@ fn extract_function_definition(node: &SyntaxNode, db: &mut TypstDefDb) {
 
     for child in node.children() {
         match child.kind() {
-            SyntaxKind::Ident
-                // Direct identifier at LetBinding level (old style)
-                if name.is_none() => {
-                    name = Some(child.text().to_string());
-                }
+            // Direct identifier at LetBinding level (old style)
+            SyntaxKind::Ident if name.is_none() => {
+                name = Some(child.text().to_string());
+            }
             SyntaxKind::Params => {
                 // Direct params at LetBinding level (old style)
                 extract_params_from_node(child, &mut params);
@@ -636,9 +635,10 @@ fn extract_function_definition(node: &SyntaxNode, db: &mut TypstDefDb) {
             | SyntaxKind::Math
             | SyntaxKind::Equation
             | SyntaxKind::FuncCall
-                if name.is_some() && body.is_none() => {
-                    body = Some(child.text().to_string());
-                }
+                if name.is_some() && body.is_none() =>
+            {
+                body = Some(child.text().to_string());
+            }
             _ => {}
         }
     }

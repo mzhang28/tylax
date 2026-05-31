@@ -62,25 +62,29 @@ pub mod features;
 /// Utility modules
 pub mod utils;
 
+/// Filesystem batch conversion API (native targets only)
+#[cfg(not(target_arch = "wasm32"))]
+pub mod batch;
+
 /// WASM bindings (feature-gated)
 #[cfg(feature = "wasm")]
 pub mod wasm;
 
 // Re-export core conversion functions
 pub use core::typst2latex;
-pub use core::typst2latex::T2LOptions;
 pub use core::typst2latex::{
     typst_document_to_latex, typst_to_latex, typst_to_latex_with_diagnostics,
     typst_to_latex_with_eval, typst_to_latex_with_options, ConversionResult as T2LConversionResult,
 };
+pub use core::typst2latex::{DocumentWrapperMode, T2LOptions};
 
 pub use core::latex2typst::{
     convert_document_with_ast, convert_document_with_ast_options, convert_math_with_ast,
     convert_math_with_ast_options, convert_with_ast, convert_with_ast_options,
     latex_math_to_typst_with_diagnostics, latex_math_to_typst_with_eval,
-    latex_to_typst_with_diagnostics, latex_to_typst_with_eval, ConversionMode,
-    ConversionResult as L2TConversionResult, ConversionState, EnvironmentContext, L2TOptions,
-    LatexConverter, WarningKind,
+    latex_to_typst_with_diagnostics, latex_to_typst_with_diagnostics_options,
+    latex_to_typst_with_eval, ConversionMode, ConversionResult as L2TConversionResult,
+    ConversionState, EnvironmentContext, L2TOptions, LatexConverter, PreambleMode, WarningKind,
 };
 
 // Re-export data modules
@@ -250,6 +254,39 @@ mod tests {
         let result = latex_to_typst(r"\frac{1}{2}");
         // With frac_to_slash enabled by default, simple fractions use slash notation
         assert!(result.contains("/") || result.contains("frac"));
+    }
+
+    #[test]
+    fn test_latex_to_typst_unbraced_command_args() {
+        assert_eq!(latex_to_typst(r"\frac 12"), "1/2");
+        assert_eq!(latex_to_typst(r"\frac 1{1-A}"), "frac(1, 1 - A)");
+        assert_eq!(latex_to_typst(r"\frac {1-A}A"), "frac(1 - A, A)");
+        assert_eq!(latex_to_typst(r"\frac {A+2}{1-A}"), "frac(A + 2, 1 - A)");
+        assert_eq!(latex_to_typst(r"\sqrt 2"), "sqrt(2)");
+        assert_eq!(latex_to_typst(r"\sqrt 12"), "sqrt(1)2");
+        assert_eq!(latex_to_typst(r"\sqrt {12}"), "sqrt(1 2)");
+        assert_eq!(latex_to_typst(r"\sqrt{12}"), "sqrt(1 2)");
+    }
+
+    #[test]
+    fn test_latex_to_typst_unbraced_command_args_extended() {
+        // Command tokens as required args - the bug went wider than \frac/\sqrt:
+        // any command taking a required arg was skipped when given an unbraced
+        // command token (before the fix, the converter only counted braced args).
+        assert_eq!(latex_to_typst(r"\frac\alpha\beta"), "alpha/ beta");
+        assert_eq!(latex_to_typst(r"\frac\alpha 2"), "alpha/2");
+        assert_eq!(latex_to_typst(r"\sqrt\alpha"), "sqrt(alpha)");
+
+        // Accent / over-line commands with unbraced single token
+        assert_eq!(latex_to_typst(r"\hat x"), "hat(x)");
+        assert_eq!(latex_to_typst(r"\overline x"), "overline(x)");
+
+        // Optional bracket arg + unbraced required arg combination
+        assert_eq!(latex_to_typst(r"\sqrt[3]2"), "root(3, 2)");
+        assert_eq!(latex_to_typst(r"\sqrt[3]{8}"), "root(3, 8)");
+
+        // \binom with unbraced args
+        assert_eq!(latex_to_typst(r"\binom n k"), "binom(n, k)");
     }
 
     #[test]

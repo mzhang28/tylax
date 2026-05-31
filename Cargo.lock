@@ -118,6 +118,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bstr"
+version = "1.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63044e1ae8e69f3b5a92c736ca6269b8d12fa7efe39bf34ddb06d102cf0e2cab"
+dependencies = [
+ "memchr",
+ "serde",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.19.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -382,6 +392,19 @@ dependencies = [
  "cfg-if",
  "libc",
  "wasi",
+]
+
+[[package]]
+name = "globset"
+version = "0.4.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52dfc19153a48bde0cbd630453615c8151bce3a5adfac7a0aebfbf0a1e1f57e3"
+dependencies = [
+ "aho-corasick",
+ "bstr",
+ "log",
+ "regex-automata",
+ "regex-syntax 0.8.8",
 ]
 
 [[package]]
@@ -1232,13 +1255,14 @@ checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
 
 [[package]]
 name = "tylax"
-version = "0.3.5"
+version = "0.3.6"
 dependencies = [
  "chrono",
  "clap",
  "console_error_panic_hook",
  "csv",
  "fxhash",
+ "globset",
  "indexmap",
  "lazy_static",
  "mitex",
@@ -1260,7 +1284,7 @@ dependencies = [
 
 [[package]]
 name = "tylax-python"
-version = "0.3.5"
+version = "0.3.6"
 dependencies = [
  "pyo3",
  "tylax",
