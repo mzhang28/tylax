@@ -368,9 +368,18 @@ mod l2t_math {
     }
 
     #[test]
-    fn test_literal_math_slash_is_escaped() {
-        assert_eq!(latex_to_typst("a/b").trim(), r"a\/b");
-        assert_eq!(latex_to_typst("$a/b$").trim(), r"$a\/b$");
+    fn test_math_slash_passes_through_literally() {
+        // Math-mode slash escaping (LaTeX `a/b` -> Typst `a\/b`) is intentionally
+        // deferred: it would change every existing user's math output, so it is
+        // tracked separately as an opt-in L2TOptions toggle. Until then `/` is
+        // emitted literally and must NOT be escaped.
+        let inline = latex_to_typst("$a/b$");
+        assert!(inline.contains('/'), "got: {}", inline);
+        assert!(
+            !inline.contains(r"\/"),
+            "slash must not be escaped, got: {}",
+            inline
+        );
     }
 
     #[test]
