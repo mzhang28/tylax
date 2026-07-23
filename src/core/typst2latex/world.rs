@@ -100,9 +100,17 @@ impl World for TylaxWorld {
             return Ok(source.clone());
         }
 
+        // Substitute Tylax compatibility shims for packages whose visual
+        // rendering we replace with semantic markers. Keyed by package name +
+        // entrypoint file (version-agnostic).
         if let VirtualRoot::Package(spec) = id.root() {
-            if spec.name == "curryst" && id.vpath().get_without_slash() == "curryst.typ" {
-                let shim = include_str!("packages/curryst.typ");
+            let vpath = id.vpath().get_without_slash();
+            let shim = match (spec.name.as_str(), vpath) {
+                ("curryst", "curryst.typ") => Some(include_str!("packages/curryst.typ")),
+                ("fletcher", "src/exports.typ") => Some(include_str!("packages/fletcher.typ")),
+                _ => None,
+            };
+            if let Some(shim) = shim {
                 let source = Source::new(id, shim.to_string());
                 sources.insert(id, source.clone());
                 return Ok(source);

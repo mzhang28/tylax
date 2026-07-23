@@ -30,42 +30,7 @@ pub fn lower_equation(eq: &Packed<EquationElem>, styles: StyleChain, ctx: &mut L
     let eq_content = eq.clone().pack();
     let transformed = apply_equation_recipes(eq_content, styles, ctx);
 
-    // Realize with `Math` kind (into a *local* arena so the borrow stays in
-    // this scope): applies math show rules (incl. the nested regex/sequence
-    // rules shorthands rely on), unwraps nested equations, and yields clean
-    // structured math elements. We emit while the arena is still alive.
-    let arenas = typst::routines::Arenas::default();
-    let mut out = String::new();
-    let mut has_align = false;
-    let mut unsup: Vec<String> = Vec::new();
-    match typst_realize::realize(
-        typst::routines::RealizationKind::Math,
-        &mut ctx.engine,
-        &mut ctx.locator,
-        &arenas,
-        &transformed,
-        styles,
-    ) {
-        Ok(pairs) => {
-            for (c, s) in &pairs {
-                emit(c, *s, &mut out, &mut has_align, &mut unsup);
-            }
-        }
-        Err(_) => {
-            // Fall back to lowering the (recipe-transformed) body directly.
-            emit(&transformed, styles, &mut out, &mut has_align, &mut unsup);
-        }
-    }
-
-    // Record any unknown math elements against the equation's span so the
-    // unsupported policy can see them (the returned marker IR is unused; the
-    // marker is already embedded in `out`).
-    let span = eq.span();
-    for name in unsup {
-        let _ = ctx.record_unsupported(&name, span);
-    }
-
-    let inner = out.split_whitespace().collect::<Vec<_>>().join(" ");
+    let (inner, has_align) = render_math(&transformed, styles, ctx, eq.span());
 
     if block {
         if has_align {
@@ -76,6 +41,47 @@ pub fn lower_equation(eq: &Packed<EquationElem>, styles: StyleChain, ctx: &mut L
     } else {
         LatexIr::Math(format!("\\ensuremath{{{inner}}}"))
     }
+}
+
+/// Realize `content` with `RealizationKind::Math` and emit it to a raw LaTeX
+/// math string (no `\[ \]` / `\ensuremath` wrapper). Returns the string and
+/// whether it contains alignment/linebreaks. Unknown math elements are recorded
+/// against `span`.
+///
+/// Realizing into a *local* arena keeps the borrow in this scope; we emit while
+/// it is still alive. Math kind applies math show rules (incl. the nested
+/// regex/sequence rules shorthands rely on) and yields clean structured math.
+fn render_math(content: &Content, styles: StyleChain, ctx: &mut LowerContext, span: typst::syntax::Span) -> (String, bool) {
+    let arenas = typst::routines::Arenas::default();
+    let mut out = String::new();
+    let mut has_align = false;
+    let mut unsup: Vec<String> = Vec::new();
+    match typst_realize::realize(
+        typst::routines::RealizationKind::Math,
+        &mut ctx.engine,
+        &mut ctx.locator,
+        &arenas,
+        content,
+        styles,
+    ) {
+        Ok(pairs) => {
+            for (c, s) in &pairs {
+                emit(c, *s, &mut out, &mut has_align, &mut unsup);
+            }
+        }
+        Err(_) => emit(content, styles, &mut out, &mut has_align, &mut unsup),
+    }
+    for name in unsup {
+        let _ = ctx.record_unsupported(&name, span);
+    }
+    (out.split_whitespace().collect::<Vec<_>>().join(" "), has_align)
+}
+
+/// Lower a piece of math content to a raw LaTeX math string (no wrapper). Used
+/// for embedding math into other LaTeX contexts such as `tikz-cd` cells and
+/// arrow labels.
+pub fn lower_math_fragment(content: &Content, styles: StyleChain, ctx: &mut LowerContext) -> String {
+    render_math(content, styles, ctx, content.span()).0
 }
 
 /// Apply any equation-level user show rules from the current style chain to the
@@ -106,6 +112,26 @@ fn emit(content: &Content, styles: StyleChain, out: &mut String, has_align: &mut
     if let Some(seq) = content.to_packed::<SequenceElem>() {
         for child in seq.children.iter() {
             emit(child, styles, out, has_align, unsup);
+        }
+        return;
+    }
+
+    // Introspection tags carry no visible output.
+    if content.is::<typst::introspection::TagElem>() {
+        return;
+    }
+
+    // A `block`/`box` wrapper (e.g. from a `[$…$]` content block used as a
+    // fletcher node body): recurse into its body.
+    if let Some(block) = content.to_packed::<typst::layout::BlockElem>() {
+        if let Some(typst::layout::BlockBody::Content(c)) = block.body.get_cloned(styles) {
+            emit(&c, styles, out, has_align, unsup);
+        }
+        return;
+    }
+    if let Some(b) = content.to_packed::<typst::layout::BoxElem>() {
+        if let Some(c) = b.body.get_cloned(styles) {
+            emit(&c, styles, out, has_align, unsup);
         }
         return;
     }
@@ -380,6 +406,7 @@ fn push_glyph(ch: char, styles: StyleChain, out: &mut String) {
         '−' => "-".to_string(),          // U+2212 minus sign
         '\u{2062}' => return,            // invisible times
         '\u{2061}' => return,            // function application
+        '\u{FE0E}' | '\u{FE0F}' => return, // variation selectors
         _ => {
             if let Some(latex) = UNICODE_TO_LATEX.get(&ch) {
                 format!("{latex} ")

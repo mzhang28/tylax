@@ -49,6 +49,7 @@ fn escape_text(text: &str) -> String {
             '\u{FE0F}' | '\u{FE0E}' => {} // variation selectors: drop
             '\u{2705}' | '\u{2714}' | '\u{2713}' => out.push_str("\\checkmark{}"), // check marks
             '…' => out.push_str("\\ldots{}"),
+            '↪' => out.push_str("\\ensuremath{\\hookrightarrow}"),
             _ => out.push(ch),
         }
     }

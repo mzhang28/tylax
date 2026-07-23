@@ -339,6 +339,14 @@ fn lower_content_inner<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut 
         if let Some(ir) = lower_curryst_metadata(metadata, styles, ctx) {
             return ir;
         }
+        // fletcher diagram marker → tikz-cd.
+        if let Value::Dict(dict) = &metadata.value {
+            if matches!(dict.get(&typst::foundations::Str::from("type")).ok(), Some(Value::Str(t)) if t.as_str() == "fletcher-diagram") {
+                if let Some(Value::Content(body)) = dict.get(&typst::foundations::Str::from("body")).ok() {
+                    return crate::core::typst2latex::lower_fletcher::lower_diagram(body, styles, ctx);
+                }
+            }
+        }
         return ctx.record_unsupported("metadata", content.span());
     }
 

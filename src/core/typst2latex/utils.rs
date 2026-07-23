@@ -133,6 +133,7 @@ lazy_static! {
         m.insert('⇐', "\\Leftarrow");
         m.insert('⇔', "\\Leftrightarrow");
         m.insert('↦', "\\mapsto");
+        m.insert('↪', "\\hookrightarrow");
         m.insert('↑', "\\uparrow");
         m.insert('↓', "\\downarrow");
         m.insert('↗', "\\nearrow");

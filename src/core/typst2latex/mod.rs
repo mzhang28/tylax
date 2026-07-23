@@ -3,6 +3,7 @@ pub mod world;
 pub mod ir;
 pub mod lower;
 pub mod lower_math;
+pub mod lower_fletcher;
 pub mod utils;
 
 pub use context::{ConvertContext, DocumentWrapperMode, EnvironmentContext, T2LOptions, TokenType, UnsupportedMode};
@@ -202,6 +203,7 @@ pub fn convert(
         "\\usepackage{mathtools}\n",
         "\\usepackage{stmaryrd}\n",
         "\\usepackage{mathpartir}\n",
+        "\\usepackage{tikz-cd}\n",
         "\\usepackage{amsthm}\n",
         // Theorem environments (theorion's make-frame identifiers). `plain`
         // style for theorem-like, `definition` (upright) for the rest.

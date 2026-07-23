@@ -2,20 +2,23 @@
 
 `tests/fixtures/algebra/main.typ` (a course-notes chapter) is the primary
 extraction target. It evaluates, converts, and compiles under tectonic. The
-unsupported count is down from **146 → 31** (items 1–4 + page geometry done);
-the remainder is diagrams and proof/`context`.
+unsupported count is down from **146 → 14** (items 1–5 + page geometry done);
+the remainder is `#proof` and one user `context`.
 
-## Remaining unsupported inventory (31)
+## Remaining unsupported inventory (14)
 
 | Count | Construct | Origin | What it is |
 |------:|-----------|--------|------------|
-| 17 | `context` | fletcher | commutative diagrams (item 5) |
 | 12 | `context` | theorion | `#proof[…]` (`context` for QED/noanswer) |
 | 2  | `context` | user (`main.typ:67`) | `if target() != "html"` branch |
 
+Both are `context` expressions — resolving them needs context evaluation
+(invoke the `ContextElem` func in a minimal engine context), which is the next
+frontier. `#proof` would then map to amsthm's `proof` environment.
+
 Done this cycle: math raw/overline/decorations (1), footnote + state-update (2),
 theorion theorem environments (3), citations/cross-refs/bibliography/labels (4),
-and page geometry (`#set page(width/height)`).
+fletcher diagrams → tikz-cd (5), and page geometry (`#set page(width/height)`).
 
 ## Root cause: unresolved `context`
 
@@ -68,7 +71,26 @@ bare `context`, still unsupported; `#exercise`/`#example` already lower as plain
   biber: tectonic has a built-in bibtex engine). The `.bib` must sit alongside
   the generated `.tex`.
 
-### 5. Diagrams (fletcher + cetz) — implement `--unsupported=image`
+### 5. Diagrams (fletcher) → tikz-cd  ✅ DONE
+A bundled `packages/fletcher.typ` shim replaces fletcher's entrypoint
+(`src/exports.typ`), capturing `diagram`/`node`/`edge` as `metadata` markers
+(the `World::source` shim table now covers curryst + fletcher). `lower_fletcher`
+lowers those to `tikz-cd`, handling both the matrix style (cells + attached
+`edge("r"/"d"/…)` markers → `\arrow[dir, "label"]`, with `equal`/`leftarrow`/…
+arrow styles and `'` swap for label-side) and the coordinate style
+(`node((x,y),…)` + `edge((x0,y0),(x1,y1),…)` → grid matrix with index-based
+directions). Defensive: labels are brace-wrapped (commas), empty cells get an
+invisible `{}` node, self-loops/dir-only edges are skipped — so pathological
+"automaton" diagrams compile (if degenerately) instead of breaking. Preamble
+gets `\usepackage{tikz-cd}`.
+
+NOTE: the more general/principled path (not taken) is to shim **cetz**
+(fletcher's rendering backend) directly, which would also cover raw cetz
+canvases — but it yields lossy coordinate-TikZ rather than semantic tikz-cd and
+would require reimplementing cetz's geometry (fletcher calls cetz expecting real
+behaviour, so a marker-shim breaks its layout).
+
+### Superseded: image mode (`--unsupported=image`)
 ~30 diagram sites. Finish the plan's image mode: render the diagram subtree via
 `typst` to SVG/PDF and emit `\includegraphics`. Doubles as the general fallback
 for context-bound subtrees.
