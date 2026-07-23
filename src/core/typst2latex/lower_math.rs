@@ -11,7 +11,9 @@
 use typst::foundations::{Content, Packed, StyleChain, SequenceElem, SymbolElem};
 use typst::text::{TextElem, SpaceElem, LinebreakElem};
 use typst::layout::{HElem, Spacing};
-use typst::math::{EquationElem, AttachElem, FracElem, RootElem, LrElem, OpElem, AlignPointElem, PrimesElem, ScriptsElem, LimitsElem};
+use typst::math::{EquationElem, AttachElem, FracElem, RootElem, LrElem, OpElem, AlignPointElem, PrimesElem, ScriptsElem, LimitsElem,
+    OverlineElem, UnderlineElem, OverbraceElem, UnderbraceElem, OverbracketElem, UnderbracketElem, OverparenElem, UnderparenElem, OvershellElem, UndershellElem};
+use typst::text::RawElem;
 use codex::styling::MathVariant;
 
 use crate::core::typst2latex::ir::LatexIr;
@@ -211,6 +213,52 @@ fn emit(content: &Content, styles: StyleChain, out: &mut String, has_align: &mut
         return;
     }
 
+    // Over/under decorations. The brace/bracket/paren/shell variants carry an
+    // optional annotation, rendered as a super/subscript on the accent.
+    if let Some(e) = content.to_packed::<OverlineElem>() {
+        return emit_accent("\\overline", &e.body, None, styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<UnderlineElem>() {
+        return emit_accent("\\underline", &e.body, None, styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<OverbraceElem>() {
+        return emit_accent("\\overbrace", &e.body, e.annotation.get_cloned(styles).map(|a| ('^', a)), styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<UnderbraceElem>() {
+        return emit_accent("\\underbrace", &e.body, e.annotation.get_cloned(styles).map(|a| ('_', a)), styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<OverbracketElem>() {
+        return emit_accent("\\overbracket", &e.body, e.annotation.get_cloned(styles).map(|a| ('^', a)), styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<UnderbracketElem>() {
+        return emit_accent("\\underbracket", &e.body, e.annotation.get_cloned(styles).map(|a| ('_', a)), styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<OverparenElem>() {
+        return emit_accent("\\overparen", &e.body, e.annotation.get_cloned(styles).map(|a| ('^', a)), styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<UnderparenElem>() {
+        return emit_accent("\\underparen", &e.body, e.annotation.get_cloned(styles).map(|a| ('_', a)), styles, out, has_align, unsup);
+    }
+    // No standard LaTeX "shell" accent; approximate with a paren accent.
+    if let Some(e) = content.to_packed::<OvershellElem>() {
+        return emit_accent("\\overparen", &e.body, e.annotation.get_cloned(styles).map(|a| ('^', a)), styles, out, has_align, unsup);
+    }
+    if let Some(e) = content.to_packed::<UndershellElem>() {
+        return emit_accent("\\underparen", &e.body, e.annotation.get_cloned(styles).map(|a| ('_', a)), styles, out, has_align, unsup);
+    }
+
+    // Inline raw (`` `code` ``) inside math → monospace.
+    if let Some(raw) = content.to_packed::<RawElem>() {
+        let text = match raw.text.clone() {
+            typst::text::RawContent::Text(t) => t.to_string(),
+            typst::text::RawContent::Lines(lines) => {
+                lines.into_iter().map(|(s, _)| s.to_string()).collect::<Vec<_>>().join(" ")
+            }
+        };
+        out.push_str(&format!("\\mathtt{{{}}}", text.replace('\\', "\\backslash ")));
+        return;
+    }
+
     // Unknown math element: mark it visibly and record it for the policy check.
     let name = content.elem().name();
     unsup.push(format!("math.{name}"));
@@ -246,6 +294,18 @@ fn emit_attach(attach: &Packed<AttachElem>, styles: StyleChain, out: &mut String
     if let Some(tr) = attach.tr.get_cloned(styles) {
         out.push('^');
         emit_group(&tr, styles, out, has_align, unsup);
+    }
+}
+
+/// Emit an over/under accent (`\overline`, `\overbrace`, ...) around `body`,
+/// with an optional annotation attached as a super/subscript (`pos` is `'^'`
+/// or `'_'`).
+fn emit_accent(cmd: &str, body: &Content, annotation: Option<(char, Content)>, styles: StyleChain, out: &mut String, has_align: &mut bool, unsup: &mut Vec<String>) {
+    out.push_str(cmd);
+    emit_group(body, styles, out, has_align, unsup);
+    if let Some((pos, ann)) = annotation {
+        out.push(pos);
+        emit_group(&ann, styles, out, has_align, unsup);
     }
 }
 

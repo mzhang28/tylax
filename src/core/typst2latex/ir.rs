@@ -19,6 +19,7 @@ pub enum LatexIr {
     Block(Box<LatexIr>),
     Strong(Box<LatexIr>),
     Emph(Box<LatexIr>),
+    Footnote(Box<LatexIr>),
     Reference(String),
     Figure { body: Box<LatexIr>, caption: Option<Box<LatexIr>> },
     Table { cols: usize, rows: Vec<Vec<LatexIr>> },
@@ -110,6 +111,7 @@ impl LatexIr {
             Self::Block(content) => content.render(),
             Self::Strong(content) => format!("\\textbf{{{}}}", content.render()),
             Self::Emph(content) => format!("\\emph{{{}}}", content.render()),
+            Self::Footnote(content) => format!("\\footnote{{{}}}", content.render()),
             Self::Reference(label) => format!("\\ref{{{}}}", label),
             Self::Figure { body, caption } => {
                 let cap = caption

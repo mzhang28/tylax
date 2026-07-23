@@ -1,7 +1,8 @@
 use typst::math::EquationElem;
 use typst::foundations::{Content, SequenceElem, StyledElem, StyleChain};
 use typst::text::{TextElem, SpaceElem, RawElem, SmartQuoteElem};
-use typst::model::{HeadingElem, ListItem, EnumItem, TermItem, LinkElem, ParbreakElem, StrongElem, EmphElem, RefElem, FigureElem, TableElem, TableChild, TableItem};
+use typst::model::{HeadingElem, ListItem, EnumItem, TermItem, LinkElem, ParbreakElem, StrongElem, EmphElem, RefElem, FigureElem, TableElem, TableChild, TableItem, FootnoteElem, FootnoteBody};
+use typst::introspection::StateUpdateElem;
 use typst::layout::{BlockElem, BoxElem, HElem, StackElem, StackChild, AlignElem};
 use typst::visualize::RectElem;
 use typst::foundations::SymbolElem;
@@ -229,6 +230,21 @@ pub fn lower_content<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut Lo
 
     if let Some(sym) = content.to_packed::<SymbolElem>() {
         return LatexIr::Text(sym.text.to_string());
+    }
+
+    // Invisible instrumentation (e.g. wordometer's `state.update()`): a pure
+    // state mutation with no visual output. Drop it silently rather than
+    // flagging it unsupported.
+    if content.is::<StateUpdateElem>() {
+        return LatexIr::Sequence(vec![]);
+    }
+
+    if let Some(footnote) = content.to_packed::<FootnoteElem>() {
+        return match &footnote.body {
+            FootnoteBody::Content(c) => LatexIr::Footnote(Box::new(lower_content(c, styles, ctx))),
+            // A footnote that references an earlier one: reuse its mark.
+            FootnoteBody::Reference(_) => LatexIr::Latex("\\footnotemark".to_string()),
+        };
     }
 
     if let Some(strong) = content.to_packed::<StrongElem>() {

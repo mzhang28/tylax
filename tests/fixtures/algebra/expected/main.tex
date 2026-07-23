@@ -14,7 +14,7 @@
 
 
 
-\texttt{[unsupported Typst element: state-update]}
+
 
  
 
@@ -64,7 +64,7 @@ Of course, since \ensuremath{F} is a functor, it must have an action on morphism
 \end{figure}
 
 
-This doesn"t cover all of the group properties yet. We are still missing associativity and the inverse laws. Unfortunately, the functor \ensuremath{F} primarily deals with the types of operations in an algebra, also known as the "signature", so the extra laws must be separately required. \texttt{[unsupported Typst element: footnote]} For example, we will define groups as follows:
+This doesn"t cover all of the group properties yet. We are still missing associativity and the inverse laws. Unfortunately, the functor \ensuremath{F} primarily deals with the types of operations in an algebra, also known as the "signature", so the extra laws must be separately required. \footnote{ There is a different construction which generates algebras from a monad, that can encapsulate having these extra axioms, but we won"t really explore that here.  } For example, we will define groups as follows:
 
 \begin{figure}[htbp]
 \centering
@@ -359,11 +359,11 @@ Visually, we can represent an automaton like this:
 
 \texttt{[unsupported Typst element: context]}
 
-This visualization represents the formal automaton defined as \ensuremath{\left( \left\{ {q}_{0}, {q}_{1}, {q}_{2} \right\}, \left\{ \mathrm{[?raw]} , \mathrm{[?raw]} , \mathrm{[?raw]} \right\}, \delta , {q}_{0}, \left\{ {q}_{2} \right\} \right)} where \ensuremath{\delta} would map: \begin{itemize}
-\item \ensuremath{\left( \mathrm{[?raw]} , {q}_{0} \right) \mapsto {q}_{2}}
-\item \ensuremath{\left( \mathrm{[?raw]} , {q}_{0} \right) \mapsto {q}_{1}}
-\item \ensuremath{\left( \mathrm{[?raw]} , {q}_{1} \right) \mapsto {q}_{1}}
-\item \ensuremath{\left( \mathrm{[?raw]} , {q}_{1} \right) \mapsto {q}_{2}}
+This visualization represents the formal automaton defined as \ensuremath{\left( \left\{ {q}_{0}, {q}_{1}, {q}_{2} \right\}, \left\{ \mathtt{a}, \mathtt{b}, \mathtt{c} \right\}, \delta , {q}_{0}, \left\{ {q}_{2} \right\} \right)} where \ensuremath{\delta} would map: \begin{itemize}
+\item \ensuremath{\left( \mathtt{a}, {q}_{0} \right) \mapsto {q}_{2}}
+\item \ensuremath{\left( \mathtt{b}, {q}_{0} \right) \mapsto {q}_{1}}
+\item \ensuremath{\left( \mathtt{b}, {q}_{1} \right) \mapsto {q}_{1}}
+\item \ensuremath{\left( \mathtt{c}, {q}_{1} \right) \mapsto {q}_{2}}
 \item all other combinations of states would resolve to an implicit "error" state (which would also be in \ensuremath{Q}), which only has transitions back to itself. It does not appear in \ensuremath{F}, the set of final states. For all intents and purposes in these notes, we can safely just ignore the fact that it exists, although we should formally make a mental note of the erroring behavior, since \ensuremath{\delta} is not a partial function.
 \end{itemize}
 
@@ -579,7 +579,7 @@ Here we introduce a powerful property of the contravariant powerset functor:
 
 
 
-We will devise a functor called \ensuremath{\mathrm{[?overline]}}, which is self-dual, that makes this diagram commute:
+We will devise a functor called \ensuremath{\overline{2}}, which is self-dual, that makes this diagram commute:
 
 \texttt{[unsupported Typst element: context]}
 
@@ -639,7 +639,7 @@ The corresponding adjoint functor for \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}},
 
 \texttt{[unsupported Typst element: context]}
 
-Finally, due to our self-dual functor \ensuremath{\mathrm{[?overline]}}, we have a functor between \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}} and \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}, that reflects reachable automata into observable automata in the \emph{reverse} language: Thus, our final minimization morphism is simply a concatenation of a series of functors:
+Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a functor between \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}} and \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}, that reflects reachable automata into observable automata in the \emph{reverse} language: Thus, our final minimization morphism is simply a concatenation of a series of functors:
 
 \texttt{[unsupported Typst element: context]}
 
