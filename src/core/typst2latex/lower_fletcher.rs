@@ -29,20 +29,27 @@ struct Edge {
 
 /// Entry point: lower a `fletcher-diagram` marker body to a `tikz-cd`.
 pub fn lower_diagram(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> LatexIr {
+    // Center a standalone diagram, but emit bare inside a table cell (display
+    // math / `center` break inside a `tabular`).
+    let centered = !ctx.in_table_cell;
     // Coordinate style iff the body contains any `fletcher-node` marker.
-    if contains_node_marker(body) {
-        lower_coordinate(body, styles, ctx)
+    let rows = if contains_node_marker(body) {
+        coordinate_rows(body, styles, ctx)
     } else {
-        lower_matrix(body, styles, ctx)
-    }
+        matrix_rows(body, styles, ctx)
+    };
+    tikzcd(rows, centered)
 }
 
-fn tikzcd(rows: String) -> LatexIr {
-    // `tikzcd` is a standalone environment; we do NOT wrap it in `\[ … \]`.
-    // Display math would break when a diagram appears inside a table cell
-    // (diagrams-in-a-`#table` is a real case), and tikzcd renders fine on its
-    // own. It is emitted on its own lines so it sits in its own paragraph.
-    LatexIr::Latex(format!("\n\\begin{{tikzcd}}\n{rows}\n\\end{{tikzcd}}\n"))
+fn tikzcd(rows: String, centered: bool) -> LatexIr {
+    let env = format!("\\begin{{tikzcd}}\n{rows}\n\\end{{tikzcd}}");
+    if centered {
+        // A standalone diagram is centered on its own line.
+        LatexIr::Latex(format!("\n\\begin{{center}}\n{env}\n\\end{{center}}\n"))
+    } else {
+        // Inside a table cell: bare (no `center`/display-math wrapper).
+        LatexIr::Latex(format!("\n{env}\n"))
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -169,7 +176,7 @@ fn arrow(dir: &str, edge: &Edge, styles: StyleChain, ctx: &mut LowerContext) -> 
 // Matrix style
 // ---------------------------------------------------------------------------
 
-fn lower_matrix(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> LatexIr {
+fn matrix_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> String {
     // Unwrap the equation to reach the matrix sequence.
     let inner = if let Some(eq) = body.to_packed::<typst::math::EquationElem>() {
         &eq.body
@@ -233,19 +240,17 @@ fn lower_matrix(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> L
         }
     }
 
-    let body = rows
-        .iter()
+    rows.iter()
         .map(|r| r.join(" & "))
         .collect::<Vec<_>>()
-        .join(" \\\\\n");
-    tikzcd(body)
+        .join(" \\\\\n")
 }
 
 // ---------------------------------------------------------------------------
 // Coordinate style
 // ---------------------------------------------------------------------------
 
-fn lower_coordinate(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> LatexIr {
+fn coordinate_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> String {
     let mut nodes: Vec<(f64, f64, Content)> = Vec::new();
     let mut edges: Vec<Edge> = Vec::new();
     collect_coordinate(body, &mut nodes, &mut edges);
@@ -291,12 +296,10 @@ fn lower_coordinate(body: &Content, styles: StyleChain, ctx: &mut LowerContext) 
         cell.push_str(&arrow(&dir, edge, styles, ctx));
     }
 
-    let body = grid
-        .iter()
+    grid.iter()
         .map(|r| r.join(" & "))
         .collect::<Vec<_>>()
-        .join(" \\\\\n");
-    tikzcd(body)
+        .join(" \\\\\n")
 }
 
 fn collect_coordinate(content: &Content, nodes: &mut Vec<(f64, f64, Content)>, edges: &mut Vec<Edge>) {

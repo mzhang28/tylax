@@ -291,7 +291,54 @@ fn emit(content: &Content, styles: StyleChain, out: &mut String, has_align: &mut
     out.push_str(&format!(" \\mathrm{{[?{name}]}} "));
 }
 
+/// If `base` is a lone arrow symbol, return the matching amsmath/mathtools
+/// extensible-arrow command (so `A ->^f B` puts `f` *over* the arrow rather
+/// than in the superscript position).
+fn arrow_xcmd(base: &Content) -> Option<&'static str> {
+    let sym = base.to_packed::<SymbolElem>()?;
+    let mut chars = sym.text.chars();
+    let ch = chars.next()?;
+    if chars.next().is_some() {
+        return None; // not a single character
+    }
+    match ch {
+        '→' | '⟶' => Some("\\xrightarrow"),
+        '←' | '⟵' => Some("\\xleftarrow"),
+        '↦' => Some("\\xmapsto"),
+        '↪' => Some("\\xhookrightarrow"),
+        _ => None,
+    }
+}
+
 fn emit_attach(attach: &Packed<AttachElem>, styles: StyleChain, out: &mut String, has_align: &mut bool, unsup: &mut Vec<String>) {
+    // Arrow with a label over/under it (`A ->^f B`): use an extensible arrow so
+    // the label sits over the arrow. Only the simple top/bottom case is handled
+    // this way; corner/pre-scripts fall through to ordinary attachment.
+    if attach.tl.get_cloned(styles).is_none()
+        && attach.bl.get_cloned(styles).is_none()
+        && attach.tr.get_cloned(styles).is_none()
+        && attach.br.get_cloned(styles).is_none()
+    {
+        if let Some(xcmd) = arrow_xcmd(&attach.base) {
+            let t = attach.t.get_cloned(styles);
+            let b = attach.b.get_cloned(styles);
+            if t.is_some() || b.is_some() {
+                out.push_str(xcmd);
+                if let Some(b) = &b {
+                    out.push('[');
+                    emit(b, styles, out, has_align, unsup);
+                    out.push(']');
+                }
+                out.push('{');
+                if let Some(t) = &t {
+                    emit(t, styles, out, has_align, unsup);
+                }
+                out.push('}');
+                return;
+            }
+        }
+    }
+
     let tl = attach.tl.get_cloned(styles);
     let bl = attach.bl.get_cloned(styles);
     // Pre-scripts (rare): emit using an empty base sidebearing.

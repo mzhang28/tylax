@@ -30,6 +30,10 @@ pub struct LowerContext<'a> {
     pub defined_labels: HashSet<String>,
     /// `.bib` resources referenced by `#bibliography(...)`, for `\addbibresource`.
     pub bib_resources: Vec<String>,
+    /// True while lowering the contents of a table cell. A diagram (tikz-cd)
+    /// centers itself with `\[ … \]` normally, but that display math breaks
+    /// inside a `tabular` cell, so cell diagrams are emitted bare.
+    pub in_table_cell: bool,
 }
 
 /// A Typst construct Tylax could not faithfully lower, with provenance.
@@ -470,6 +474,11 @@ fn find_theorion_frame<'a>(content: &'a Content) -> Option<&'a typst::foundation
 fn lower_table(table: &typst::foundations::Packed<TableElem>, styles: StyleChain, ctx: &mut LowerContext) -> LatexIr {
     let cols = table.columns.get_ref(styles).0.len().max(1);
 
+    // Cell contents are lowered in table-cell mode (so e.g. diagrams emit bare
+    // rather than as display math, which breaks inside a `tabular`).
+    let outer_in_cell = ctx.in_table_cell;
+    ctx.in_table_cell = true;
+
     let mut cells: Vec<LatexIr> = Vec::new();
     let collect_item = |item: &TableItem, ctx: &mut LowerContext, cells: &mut Vec<LatexIr>| {
         if let TableItem::Cell(cell) = item {
@@ -491,6 +500,8 @@ fn lower_table(table: &typst::foundations::Packed<TableElem>, styles: StyleChain
             }
         }
     }
+
+    ctx.in_table_cell = outer_in_cell;
 
     let rows: Vec<Vec<LatexIr>> = cells
         .chunks(cols)

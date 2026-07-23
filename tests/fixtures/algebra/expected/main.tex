@@ -78,7 +78,7 @@ But each of these are still independent pieces of a group definition. We must co
 
 So our combined morphism \ensuremath{\alpha : F\left( X \right) \rightarrow X} essentially gives us a choice of which operation we would like to take, as well as how each is implemented. It should be clear at this point that each functor \ensuremath{F} can possibly have multiple \ensuremath{\alpha : F\left( X \right) \rightarrow X}. This corresponds to the notion that there are multiple groups, multiple rings, multiple Boolean algebras, etc.
 
-Of course, since \ensuremath{F} is a functor, it must have an action on morphisms as well. In the case of \ensuremath{F\left( X \right) = A \times X + B}, a functor application to a morphism \ensuremath{F\left( X {\rightarrow }^{f} Y \right)} would have type \ensuremath{A \times X + B {\rightarrow }^{F\left( f \right)} A \times Y + B}. It may be useful to think of \ensuremath{F\left( f \right)} as being a coproduct of morphisms \ensuremath{A \times X {\rightarrow }^{{f}_{1}} A \times Y} and \ensuremath{B {\rightarrow }^{{f}_{2}} B}. This is often true for the cases we will be studying, as many of the functors for the common algebras do exhibit this property. However, it may not be true in general, and the categorical framework for algebra allows for functors that mix between the different components. Still, we will use the notation \ensuremath{F\left( f \right) = {f}_{1} + {f}_{2}} in the remainder of the notes.
+Of course, since \ensuremath{F} is a functor, it must have an action on morphisms as well. In the case of \ensuremath{F\left( X \right) = A \times X + B}, a functor application to a morphism \ensuremath{F\left( X \xrightarrow{f} Y \right)} would have type \ensuremath{A \times X + B \xrightarrow{F\left( f \right)} A \times Y + B}. It may be useful to think of \ensuremath{F\left( f \right)} as being a coproduct of morphisms \ensuremath{A \times X \xrightarrow{{f}_{1}} A \times Y} and \ensuremath{B \xrightarrow{{f}_{2}} B}. This is often true for the cases we will be studying, as many of the functors for the common algebras do exhibit this property. However, it may not be true in general, and the categorical framework for algebra allows for functors that mix between the different components. Still, we will use the notation \ensuremath{F\left( f \right) = {f}_{1} + {f}_{2}} in the remainder of the notes.
 
 \begin{definition}[\ensuremath{F}-algebra]
  Let \ensuremath{\mathcal{C}} be an ambient category. An \ensuremath{F}-algebra is a pair \ensuremath{\left( X, \alpha : F\left( X \right) \rightarrow X \right)}, where \ensuremath{X \in \mathsf{Ob}\left( \mathcal{C} \right)}, \ensuremath{F} is an endofunctor \ensuremath{\mathcal{C} \rightarrow \mathcal{C}}, and \ensuremath{\alpha : F\left( X \right) \rightarrow X}. 
@@ -93,24 +93,30 @@ F\left( X \right) = 1 + X + X \times X
 \] where the components are named \ensuremath{\left[ e, \mathsf{inv}, \left( \cdot \right) \right]}, such that the following diagrams commute:
 
 
+\begin{center}
 \begin{tikzcd}
 X \times \left( X \times X \right) \arrow[rr, equal, "{\mathsf{assoc}}"] \arrow[d, "{\left( \mathsf{id}, \cdot \right)}"] & {} & \left( X \times X \right) \times X \arrow[d, "{\left( \cdot , \mathsf{id} \right)}"] \\
 X \times X \arrow[r, "{\left( \cdot \right)}"'] & X \arrow[r, leftarrow, "{\left( \cdot \right)}"'] & X \times X
 \end{tikzcd}
+\end{center}
 
 
 
+\begin{center}
 \begin{tikzcd}
 X \arrow[r, "{\left( \mathsf{id}, {\mathsf{inv}}_{R} \right)}"] \arrow[d, "{!}"] & X \times X \arrow[r, leftarrow, "{\left( {\mathsf{inv}}_{L}, \mathsf{id} \right)}"] \arrow[d, "{\left( \cdot \right)}"] & X \arrow[d, "{!}"] \\
 1 \arrow[r, "{\mathsf{id}}"'] & X \arrow[r, leftarrow, "{\mathsf{id}}"'] & 1
 \end{tikzcd}
+\end{center}
 
 
 
+\begin{center}
 \begin{tikzcd}
 1 \times X \arrow[r, "{\left( e, \mathsf{id} \right)}"] \arrow[dr, equal] & X \times X \arrow[r, leftarrow, "{\left( \mathsf{id}, e \right)}"] \arrow[d, "{\left( \cdot \right)}"] & X \times 1 \arrow[dl, equal] \\
 {} & X & {}
 \end{tikzcd}
+\end{center}
  
 \end{definition}
 
@@ -121,10 +127,12 @@ It turns out there are some interesting \ensuremath{F}-algebras when we consider
  Let \ensuremath{\left( X, {\alpha }_{X} \right)} and \ensuremath{\left( Y, {\alpha }_{Y} \right)} be two \ensuremath{F}-algebras in a category \ensuremath{\mathcal{C}}. An \ensuremath{F}-algebra morphism is then a morphism \ensuremath{f : X \rightarrow Y} such that the following diagram commutes:
 
 
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[r, "{{\alpha }_{X}}"] \arrow[d, "{F\left( f \right)}"] & X \arrow[d, "{f}"] \\
 F\left( Y \right) \arrow[r, "{{\alpha }_{Y}}"'] & Y
 \end{tikzcd}
+\end{center}
  
 \end{definition}
 \label{fAlgMor} 
@@ -138,22 +146,28 @@ Let us now interpret this commutative square in the context of the \ensuremath{F
 
 \begin{itemize}
 \item In the case of identity, the component of \ensuremath{F\left( X \right)} we are focusing on is \ensuremath{F\left( X \right) = 1}. So both \ensuremath{F\left( X \right)} and \ensuremath{F\left( Y \right)} evaluate to \ensuremath{1}, so \ensuremath{F\left( X \right) \rightarrow F\left( Y \right)} can only be the unique identity morphism in \ensuremath{1}. Thus, the left side collapses and we have a triangle: 
+\begin{center}
 \begin{tikzcd}
 1 \arrow[r, "{{\alpha }_{X}}"] \arrow[dr, "{{\alpha }_{Y}}"'] & X \arrow[d, "{f}"] \\
 {} & Y
 \end{tikzcd}
+\end{center}
  Translating this to group theory, this means our choice of \ensuremath{{\alpha }_{Y}}, the function that picks out the group identity of \ensuremath{Y}, must agree with the result of mapping \ensuremath{f} to the group identity of \ensuremath{X}. In other words, group homomorphisms preserve identities.
 \item In the case of inverse, \ensuremath{F\left( X \right) = X}, so we have the following diagram: 
+\begin{center}
 \begin{tikzcd}
 X \arrow[r, "{{\mathsf{inv}}_{X}}"] \arrow[d, "{f}"] & X \arrow[d, "{f}"] \\
 Y \arrow[r, "{{\mathsf{inv}}_{Y}}"'] & Y
 \end{tikzcd}
+\end{center}
  This translates to \ensuremath{{\mathsf{inv}}_{Y} \circ f = f \circ {\mathsf{inv}}_{X}}, which written algebraically says that for any \ensuremath{x \in X}, it must hold that \ensuremath{{f\left( x \right)}^{-1} = f\left( {x}^{-1} \right)}. In other words, group homomorphisms preserve inverses.
 \item In the case of the binary operation \ensuremath{\left( \cdot \right)}, we have \ensuremath{F\left( X \right) = X \times X}, so we have the following diagram (recall the definition of the action of \ensuremath{F} on morphisms): 
+\begin{center}
 \begin{tikzcd}
 X \times X \arrow[r, "{{\left( \cdot \right)}_{X}}"] \arrow[d, "{\left( f, f \right)}"] & X \arrow[d, "{f}"] \\
 Y \times Y \arrow[r, "{{\left( \cdot \right)}_{Y}}"'] & Y
 \end{tikzcd}
+\end{center}
  Translating this to algebra, we have \ensuremath{f\left( x {\cdot }_{X} y \right) = f\left( x \right) {\cdot }_{Y} f\left( y \right)}, which is the main group homomorphism property.
 \end{itemize}
 
@@ -178,10 +192,12 @@ Suppose we are working with an \ensuremath{\left( X, \alpha \right)} that is ini
 For example, consider any other \ensuremath{F}-algebra \ensuremath{\beta : \left( 1 + Y \right) \rightarrow Y}, with corresponding \ensuremath{\left[ {\beta }_{1}, {\beta }_{Y} \right]}. Then, there exists a \emph{unique} \ensuremath{f : X \rightarrow Y} such that this square commutes:
 
 
+\begin{center}
 \begin{tikzcd}
 1 + X \arrow[r] \arrow[d, "{F\left( f \right)}"] & X \arrow[d, "{f}"] \\
 1 + Y \arrow[r] & Y
 \end{tikzcd}
+\end{center}
 
 
 where \ensuremath{F\left( f \right)} is defined on cases: \begin{itemize}
@@ -244,48 +260,58 @@ There seems to be some parallel between the structure of \ensuremath{F\left( X \
 \emph{Proof}.  We begin with our structure map
 
 
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[r] & X
 \end{tikzcd}
+\end{center}
 
 
 which is initial in the category of \ensuremath{F}-algebras. Let us "use" this initiality by coming up with another \ensuremath{F}-algebra to map this to. We will use \ensuremath{!} to denote the catamorphism – the unique morphism out of the initial \ensuremath{F}-algebra.
 
 
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[r] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
 ? \arrow[r, "{?}"'] & ? \\
 {} & {}
 \end{tikzcd}
+\end{center}
 
 
 We will choose the particular \ensuremath{F}-algebra defined by applying \ensuremath{F} again:
 
 
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[r] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
 F\left( F\left( X \right) \right) \arrow[r, "{F\left( \alpha \right)}"'] & F\left( X \right) \\
 {} & {}
 \end{tikzcd}
+\end{center}
 
 
 If we tack on a tautological square to the bottom, we get:
 
  
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[d, "{F\left( ! \right)}"'] \arrow[r, "{\alpha}"] & X \arrow[d, "{!}"] \\
 F\left( F\left( X \right) \right) \arrow[d, "{F\left( \alpha \right)}"'] \arrow[r, "{F\left( \alpha \right)}"] & F\left( X \right) \arrow[d, "{\alpha}"] \\
 F\left( X \right) \arrow[r, "{\alpha}"'] & X
 \end{tikzcd}
+\end{center}
 
 
 We can then "squish" the square using composition, and also using the functoriality of \ensuremath{F} to simplify \ensuremath{F\left( \alpha \right) \circ F\left( ! \right)} into \ensuremath{F\left( \alpha \circ ! \right)}:
 
  
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[r, "{\alpha}"] \arrow[d, "{F\left( \alpha \circ ! \right)}"'] & X \arrow[d, "{\alpha \circ !}"] \\
 F\left( X \right) \arrow[r, "{\alpha}"'] & X
 \end{tikzcd}
+\end{center}
 
 
 This is exactly the \href{}{\ensuremath{F}-algebra morphism diagram} showing that \ensuremath{\alpha \circ !} is a morphism from the \ensuremath{F}-algebra \ensuremath{\left( X, \alpha \right)} to itself. Since the morphism out of an initial object is unique, we know that it must coincide with the identity morphism, so \ensuremath{\alpha \circ ! = {\mathsf{id}}_{X}}.
@@ -293,11 +319,13 @@ This is exactly the \href{}{\ensuremath{F}-algebra morphism diagram} showing tha
 This is the first half of our proof. It remains to be shown that \ensuremath{! \circ \alpha = {\mathsf{id}}_{F\left( X \right)}}. Using the result that \ensuremath{\alpha \circ ! = {\mathsf{id}}_{X}}, apply \ensuremath{F} to both sides, getting \ensuremath{F\left( \alpha \circ ! \right) = F\left( {\mathsf{id}}_{X} \right)}, which by functoriality yields \ensuremath{F\left( \alpha \right) \circ F\left( ! \right) = {\mathsf{id}}_{F\left( X \right)}}. But looking at this square from above:
 
 
+\begin{center}
 \begin{tikzcd}
 F\left( X \right) \arrow[r] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
 F\left( F\left( X \right) \right) \arrow[r, "{F\left( \alpha \right)}"'] & F\left( X \right) \\
 {} & {}
 \end{tikzcd}
+\end{center}
 
 
 We know that \ensuremath{F\left( \alpha \right) \circ F\left( ! \right) = ! \circ \alpha}. Therefore, \ensuremath{! \circ \alpha = {\mathsf{id}}_{F\left( X \right)}}, and \ensuremath{\alpha} is an isomorphism with inverse \ensuremath{!}.  ⁠ \ensuremath{\square}
@@ -347,10 +375,12 @@ And as usual, we must also define morphisms:
  Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be two \ensuremath{F}-coalgebras in a category \ensuremath{\mathcal{C}}. An \ensuremath{F}-coalgebra morphism is then a morphism \ensuremath{f : X \rightarrow Y} such that the following diagram commutes:
 
 
+\begin{center}
 \begin{tikzcd}
 X \arrow[r, "{{\nu }_{X}}"] \arrow[d, "{f}"] & F\left( X \right) \arrow[d, "{F\left( f \right)}"] \\
 Y \arrow[r, "{{\nu }_{Y}}"'] & F\left( Y \right)
 \end{tikzcd}
+\end{center}
  
 \end{definition}
 \label{fCoalgebraMorphism} 
@@ -407,10 +437,12 @@ But does this choice work? We must check that all the rules are satisfied.
 \emph{Proof}.  First, we must show that for any \ensuremath{\left( Y, {\nu }_{Y} \right)}, that an \ensuremath{f : Y \rightarrow X} even exists. We will do so by generating a sequence of \ensuremath{a}'s from \ensuremath{{\nu }_{Y}}. First, begin with \ensuremath{y \in Y}, and run \ensuremath{{\nu }_{Y} \left( y \right)} to get \ensuremath{{y}_{1} : A \times Y}. We'll take the first element \ensuremath{\mathsf{head}\left( {y}_{1} \right) : A} as the first observation, and keep the rest which is \ensuremath{\mathsf{tail}\left( {y}_{1} \right) : Y}. Then, we can repeat the process, running \ensuremath{{\nu }_{Y} \left( {y}_{1} \right)} to get \ensuremath{{y}_{2} : A \times Y}. By continuing to repeat this process, we'll just end up with an infinite series of \ensuremath{a}'s, which we can write as \ensuremath{{a}_{0}, {a}_{1}, {a}_{2}, \ldots}. We'll refer to this as the \emph{behavior} of \ensuremath{Y}. Notice that we didn't need to depend on what the structure of \ensuremath{Y} was.
 
 Now we need to verify that our choice of \ensuremath{f} is well-behaved, with regards to all of the conditions we defined earlier. Let us revisit the commuting square from \ref{fCoalgebraMorphism}: 
+\begin{center}
 \begin{tikzcd}
 Y \arrow[r, "{{\nu }_{Y}}"] \arrow[d, "{f}"] & A \times Y \arrow[d, "{F\left( f \right)}"] \\
 {A}^{\mathbb{N} } \arrow[r, "{{\nu }_{X}}"'] & A \times {A}^{\mathbb{N} }
 \end{tikzcd}
+\end{center}
 
 
 Translating this to an equation, we get:
@@ -443,10 +475,12 @@ The morphism \ensuremath{f} defined in \ref{fExists} is unique.
 For this, we'll need to use a different kind of reasoning than before. We will have to use \textbf{coinduction}, which is dual to induction and is perfect for working with codata such as streams.
 
 \emph{Proof}.  Suppose we have \ensuremath{g : Y \rightarrow {A}^{\mathbb{N} }} that respects the square. We would like to show that \ensuremath{f = g}. Extensionally, this means \ensuremath{f} and \ensuremath{g} produce the same output on all inputs, as functions. Now, \ensuremath{g} is an unknown function, but it has the shape \ensuremath{Y \rightarrow {A}^{\mathbb{N} }}, so we know it produces an infinite stream of \ensuremath{a}'s. Furthemore, we know that: 
+\begin{center}
 \begin{tikzcd}
 Y \arrow[r, "{{\nu }_{Y}}"] \arrow[d, "{g}"] & A \times Y \arrow[d, "{\mathsf{id} \times g}"] \\
 {A}^{\mathbb{N} } \arrow[r, "{{\nu }_{X}}"'] & A \times {A}^{\mathbb{N} }
 \end{tikzcd}
+\end{center}
  which says that \ensuremath{{\nu }_{X} \circ g = \left( \mathsf{id} \times g \right) \circ {\nu }_{Y}}. This means at least the first element of the sequence produced by \ensuremath{g} must be picked out by \ensuremath{{\nu }_{Y}}. Otherwise, \ensuremath{\mathsf{id}\left( \mathsf{head}\left( {\nu }_{Y} \left( y \right) \right) \right)} would not produce the same result as \ensuremath{\mathsf{head}\left( {\nu }_{X} \left( g\left( y \right) \right) \right)}. Thus, the first element of the sequence must be \ensuremath{\mathsf{head}\left( {\nu }_{Y} \left( y \right) \right)}.
 
 Then, regarding the tail end of the sequence, we would like to argue coinductively that it must follow the same shape. Specifically, let \ensuremath{{\nu }_{Y} \left( y \right) = \left( {a}_{0}, {y}^{'} \right)}. Following the top-right path, we can see that the tail part of the result is \ensuremath{g\left( {y}^{'} \right)}. Since \ensuremath{g} is unknown, we can't really say what this is yet, but we can look at the left-bottom path, which tells us that the tail part of the result must be \ensuremath{\mathsf{tail}\left( g\left( y \right) \right)}, since as a reminder, our \ensuremath{{\nu }_{X}} specifically splits a sequence \ensuremath{{A}^{\mathbb{N} }} into its \ensuremath{\mathsf{head}} and \ensuremath{\mathsf{tail}} parts. This tells us that \ensuremath{g\left( {y}^{'} \right) = \mathsf{tail}\left( g\left( y \right) \right)}, which is exactly what we expect.
@@ -472,10 +506,12 @@ It turns out if we just take everything that has specifically to do with streams
  Let \ensuremath{\mathcal{C}} be a category with products, and \ensuremath{F : \mathcal{C} \rightarrow \mathcal{C}} be an endofunctor. Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be \ensuremath{F}-coalgebras. Let \ensuremath{R} be a subobject of the product object \ensuremath{X \times Y} with projection morphisms \ensuremath{{\pi }_{X}} and \ensuremath{{\pi }_{Y}} such that there exists a morphism \ensuremath{{\nu }_{R} : R \rightarrow F\left( R \right)} such that the following diagram commutes:
 
  
+\begin{center}
 \begin{tikzcd}
 X \arrow[d, "{{\nu }_{X}}"'] & R \arrow[l, "{{\pi }_{1}}"'] \arrow[r, "{{\pi }_{2}}"] \arrow[d, "{{\nu }_{R}}"] & Y \arrow[d, "{{\nu }_{Y}}"] \\
 F\left( X \right) & F\left( R \right) \arrow[l, "{F\left( {\pi }_{1} \right)}"] \arrow[r, "{F\left( {\pi }_{2} \right)}"'] & F\left( Y \right)
 \end{tikzcd}
+\end{center}
  
 \end{definition}
 \label{genericBisimulation} 
@@ -516,9 +552,11 @@ We'll look at how automata can be abstracted using algebras and coalgebras, and 
 Visually, we can represent an automaton like this:
 
 
+\begin{center}
 \begin{tikzcd}
 {q}_{0} \arrow[rr, "{a}"] & {q}_{1} & {q}_{2}
 \end{tikzcd}
+\end{center}
 
 
 This visualization represents the formal automaton defined as \ensuremath{\left( \left\{ {q}_{0}, {q}_{1}, {q}_{2} \right\}, \left\{ \mathtt{a}, \mathtt{b}, \mathtt{c} \right\}, \delta , {q}_{0}, \left\{ {q}_{2} \right\} \right)} where \ensuremath{\delta} would map: \begin{itemize}
@@ -554,9 +592,11 @@ Traditionally, non-deterministic automata would be converted deterministic using
 For this section, we will consider a particular problem concerning automata: there is a sense in which an NFA might not be minimal. For example, consider this automaton:
 
 
+\begin{center}
 \begin{tikzcd}
 {} & {} \arrow[l, "{a}"]
 \end{tikzcd}
+\end{center}
 
 
 You could easily imagine collapsing all of these down to a single node. Due to this, there are several minimization algorithms. A well-known algorithm, due to Brzozowski, involves reversing the NFA, determinizing it using the powerset construction, and then reversing it again. In this next section, we will investigate a category-theoretic approach by \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} to show why this works, specifically for the case of deterministic automata.
@@ -571,10 +611,12 @@ In order to categorify automata, we must first identify a category. We want the 
 
 \begin{itemize}
 \item \ensuremath{f} commutes with the transition map, or in other words, for any \ensuremath{s \in \Sigma}, this square commutes: 
+\begin{center}
 \begin{tikzcd}
 {Q}_{1} \arrow[r, "{f}"] \arrow[d, "{{\delta }_{1} \left( -, s \right)}"] & {Q}_{2} \arrow[d, "{{\delta }_{2} \left( -, s \right)}"] \\
 {Q}_{1} \arrow[r, "{f}"'] & {Q}_{2}
 \end{tikzcd}
+\end{center}
 
 \item \ensuremath{f} preserves the initial state, or in other words \ensuremath{f\left( {i}_{1} \right) = {i}_{2}}
 \item \ensuremath{f} preserves the final states, or in other words \ensuremath{f\left( q \right) \in {F}_{2}} for all \ensuremath{q \in {F}_{1}}
@@ -782,14 +824,14 @@ Here is where the magic happens. The function \ensuremath{{\delta }_{Q}} is esse
 
 \textbf{This is exactly the behavior of the contravariant power functor!}
 
-Let's step back one step and build up to this insight. If we just considered the category of sets \ensuremath{\mathbf{Set}}, the \emph{powerset functor} \ensuremath{\mathcal{P} : \mathbf{Set} \rightarrow \mathbf{Set}} maps every set \ensuremath{X} to its power set \ensuremath{\mathcal{P}\left( X \right)}. In particular, for morphisms, it has type \ensuremath{\mathcal{P}\left( X {\rightarrow }^{f} Y \right) : \mathcal{P}\left( X \right) \rightarrow \mathcal{P}\left( Y \right)}. For any subset of \ensuremath{X}, it maps \ensuremath{f} restricted to that subset to obtain an image that is in the subset of \ensuremath{Y}.
+Let's step back one step and build up to this insight. If we just considered the category of sets \ensuremath{\mathbf{Set}}, the \emph{powerset functor} \ensuremath{\mathcal{P} : \mathbf{Set} \rightarrow \mathbf{Set}} maps every set \ensuremath{X} to its power set \ensuremath{\mathcal{P}\left( X \right)}. In particular, for morphisms, it has type \ensuremath{\mathcal{P}\left( X \xrightarrow{f} Y \right) : \mathcal{P}\left( X \right) \rightarrow \mathcal{P}\left( Y \right)}. For any subset of \ensuremath{X}, it maps \ensuremath{f} restricted to that subset to obtain an image that is in the subset of \ensuremath{Y}.
 
-There is also a contravariant version, which we will denote \ensuremath{{\mathcal{P}}^{∗} : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. In particular, the action on morphisms has type \ensuremath{{\mathcal{P}}^{∗} \left( X {\rightarrow }^{f} Y \right) : \mathcal{P}\left( Y \right) \rightarrow \mathcal{P}\left( X \right)}. This action maps a subset of \ensuremath{Y} into the \emph{pre-image} under \ensuremath{f}, which is a subset of \ensuremath{X}.
+There is also a contravariant version, which we will denote \ensuremath{{\mathcal{P}}^{∗} : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. In particular, the action on morphisms has type \ensuremath{{\mathcal{P}}^{∗} \left( X \xrightarrow{f} Y \right) : \mathcal{P}\left( Y \right) \rightarrow \mathcal{P}\left( X \right)}. This action maps a subset of \ensuremath{Y} into the \emph{pre-image} under \ensuremath{f}, which is a subset of \ensuremath{X}.
 
 This is exactly what our \ensuremath{{\delta }_{{Q}^{'}}} is doing! In essence, our desired transformation is performing the covariant powerset functor on each of the components of the automata. We can concretize this idea by constructing a forgetful functor \ensuremath{U : {\mathsf{DA}}_{\mathcal{L}} \rightarrow \mathbf{Set}} which simply takes the set of states and forgets all the other structure. Then, we can see clearly that:
 
 \[
-U\left( Q \right) {\rightarrow }^{{\mathcal{P}}^{∗}} U\left( {Q}^{'} \right)
+U\left( Q \right) \xrightarrow{{\mathcal{P}}^{∗}} U\left( {Q}^{'} \right)
 \]
 
 Here we introduce a powerful property of the contravariant powerset functor:
@@ -842,10 +884,12 @@ and the other way:
 We will devise a functor called \ensuremath{\overline{2}}, which is self-dual, that makes this diagram commute:
 
 
+\begin{center}
 \begin{tikzcd}
 {\mathsf{DA}}_{\mathcal{L}} \arrow[r, "{\overline{2}}"] \arrow[r] \arrow[r, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
 \mathbf{Set} \arrow[r, "{{\mathcal{P}}^{∗}}"] \arrow[r] \arrow[r, leftarrow, "{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
 \end{tikzcd}
+\end{center}
 
 
 This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{∗}} into \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. The paper \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} notes that this lifting is true generically
@@ -861,7 +905,7 @@ This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{∗}} into
 \item \ensuremath{{F}_{Q}} is transformed into the set of all initial states
 \end{itemize}
 
-\item action on morphisms maps a morphism \ensuremath{{Q}_{1} {\rightarrow }^{f} {Q}_{2}} to its inverse mapping \ensuremath{\mathcal{P}\left( {Q}_{2} \right) {\rightarrow }^{\overline{\mathcal{P}}\left( f \right)} \mathcal{P}\left( {Q}_{1} \right)}
+\item action on morphisms maps a morphism \ensuremath{{Q}_{1} \xrightarrow{f} {Q}_{2}} to its inverse mapping \ensuremath{\mathcal{P}\left( {Q}_{2} \right) \xrightarrow{\overline{\mathcal{P}}\left( f \right)} \mathcal{P}\left( {Q}_{1} \right)}
 \end{itemize}
 
 \end{definition}
@@ -882,11 +926,13 @@ In order to see how all of this machinery comes together, we will introduce some
 Since minimal automata are ones that are both reachable and observable, it must also be true that \ensuremath{{\mathsf{mDA}}_{\mathcal{L}}} is a subcategory of both \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}} and \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}. This means the subcategory relationships can be represented as a sort of diamond diagram:
 
 
+\begin{center}
 \begin{tikzcd}
 {} & {\mathsf{DA}}_{\mathcal{L}} \arrow[dl] \arrow[dr] & {} \\
 {\mathsf{rDA}}_{\mathcal{L}} \arrow[dr] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[dl] \\
 {} & {\mathsf{mDA}}_{\mathcal{L}} & {}
 \end{tikzcd}
+\end{center}
 
 
 The arrows between them represent inclusion functors. In fact, these are a special kind of subcategory known as a \emph{reflective} (and \emph{co-reflective}) subcategory. For reflective subcategories, this means that the inclusion functor has a left adjoint. Dually, for co-reflective subcategories, this means that the inclusion functor has a right adjoint. Let us see why this holds.
@@ -937,7 +983,7 @@ Instantiating this with our \ensuremath{{Q}^{'} : {\mathsf{rDA}}_{\mathcal{L}}}:
 
 \[
 \begin{aligned}
-{\left( \epsilon I \right)}_{{Q}^{'}} \circ {\left( I \eta \right)}_{{Q}^{'}} & = {\left( {1}_{I} \right)}_{{Q}^{'}} \\ I\left( {Q}^{'} \right) {\longrightarrow }^{{\left( I \eta \right)}_{{Q}^{'}}} I\left( R\left( I\left( {Q}^{'} \right) \right) \right) {\longrightarrow }^{{\left( \epsilon I \right)}_{{Q}^{'}}} I\left( {Q}^{'} \right) & = I\left( {Q}^{'} \right) {\longrightarrow }^{{\left( {1}_{I} \right)}_{{Q}^{'}}} I\left( {Q}^{'} \right)
+{\left( \epsilon I \right)}_{{Q}^{'}} \circ {\left( I \eta \right)}_{{Q}^{'}} & = {\left( {1}_{I} \right)}_{{Q}^{'}} \\ I\left( {Q}^{'} \right) \xrightarrow{{\left( I \eta \right)}_{{Q}^{'}}} I\left( R\left( I\left( {Q}^{'} \right) \right) \right) \xrightarrow{{\left( \epsilon I \right)}_{{Q}^{'}}} I\left( {Q}^{'} \right) & = I\left( {Q}^{'} \right) \xrightarrow{{\left( {1}_{I} \right)}_{{Q}^{'}}} I\left( {Q}^{'} \right)
 \end{aligned}
 \]
 
@@ -953,7 +999,7 @@ Instantiating this with \ensuremath{Q : {\mathsf{DA}}_{\mathcal{L}}}:
 
 \[
 \begin{aligned}
-{\left( \epsilon R \right)}_{Q} \circ {\left( R \eta \right)}_{Q} = {\left( {1}_{R} \right)}_{Q} \\ R\left( Q \right) {\longrightarrow }^{{\left( R \eta \right)}_{Q}} R\left( I\left( R\left( Q \right) \right) \right) {\longrightarrow }^{{\left( \epsilon R \right)}_{Q}} R\left( Q \right) = R\left( Q \right) {\longrightarrow }^{{\left( {1}_{R} \right)}_{Q}} R\left( Q \right)
+{\left( \epsilon R \right)}_{Q} \circ {\left( R \eta \right)}_{Q} = {\left( {1}_{R} \right)}_{Q} \\ R\left( Q \right) \xrightarrow{{\left( R \eta \right)}_{Q}} R\left( I\left( R\left( Q \right) \right) \right) \xrightarrow{{\left( \epsilon R \right)}_{Q}} R\left( Q \right) = R\left( Q \right) \xrightarrow{{\left( {1}_{R} \right)}_{Q}} R\left( Q \right)
 \end{aligned}
 \]
 
@@ -992,21 +1038,25 @@ Prove \ref{oDALReflectiveSubcategory}. The proof should look mostly like a duali
 The corresponding adjoint functor for \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}}, called \ensuremath{R}, then restricts automata in the input category to their reachable subset. Similarly, the corresponding adjoint functor for \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}, called \ensuremath{O}, restricts automata in \emph{its} input category to their observable subset. And then at the bottom, \ensuremath{{\mathsf{mDA}}_{\mathcal{L}}} is both a reflective subcategory and co-reflective subcategory of \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}} and \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}}, respectively. Let us update the diamond diagram to see these new functors:
 
 
+\begin{center}
 \begin{tikzcd}
 {} & {\mathsf{DA}}_{\mathcal{L}} & {} \\
 {\mathsf{rDA}}_{\mathcal{L}} & {} & {\mathsf{oDA}}_{\mathcal{L}} \\
 {} & {\mathsf{mDA}}_{\mathcal{L}} & {}
 \end{tikzcd}
+\end{center}
 
 
 Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a functor between \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}} and \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}, that reflects reachable automata into observable automata in the \emph{reverse} language: Thus, our final minimization morphism is simply a concatenation of a series of functors:
 
 
+\begin{center}
 \begin{tikzcd}
 {} &  & {} & {} & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} & {} \\
 {\mathsf{rDA}}_{\mathcal{L}} & {} & {\mathsf{oDA}}_{\mathcal{L}} & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \\
 {} &  & {} & {} & {{\mathsf{mDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} & {}
 \end{tikzcd}
+\end{center}
 
 
 \begin{theorem}[Brzozowski minimization algorithm]

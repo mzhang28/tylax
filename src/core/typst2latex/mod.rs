@@ -161,6 +161,7 @@ pub fn convert(
         unsupported: Vec::new(),
         defined_labels,
         bib_resources: Vec::new(),
+        in_table_cell: false,
     };
 
     let latex_ir = ir::LatexIr::Document(vec![lower::lower_content(&content, styles, &mut ctx)]);
