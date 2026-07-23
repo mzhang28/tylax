@@ -4,12 +4,31 @@
 \usepackage{mathtools}
 \usepackage{stmaryrd}
 \usepackage{mathpartir}
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{conjecture}{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+\newtheorem{axiom}{Axiom}
+\newtheorem{postulate}{Postulate}
+\newtheorem{assumption}{Assumption}
+\newtheorem{property}{Property}
+\newtheorem{exercise}{Exercise}
 \usepackage{titlesec}
 \newfontfamily\headingfont{Libertinus Sans}
 \titleformat*{\section}{\Large\bfseries\headingfont}
 \titleformat*{\subsection}{\large\bfseries\headingfont}
 \titleformat*{\subsubsection}{\normalsize\bfseries\headingfont}
 \usepackage{hyperref}
+\usepackage[paperwidth=612pt,paperheight=792pt]{geometry}
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{zotero.bib}
 \begin{document}
 
 
@@ -40,7 +59,7 @@
 
 They all seem to look kind of familiar – a carrier, usually a set, followed by some operations on that carrier, satisfying some axioms. It may be useful to look for an abstraction over all of these.
 
-In order to make it easier to think about abstractions for a universal algebra, we"ll start by focusing our work in the category of sets \ensuremath{\mathbf{Set}}. So our carrier will be some object in \ensuremath{\mathbf{Set}}.
+In order to make it easier to think about abstractions for a universal algebra, we'll start by focusing our work in the category of sets \ensuremath{\mathbf{Set}}. So our carrier will be some object in \ensuremath{\mathbf{Set}}.
 
 Now, consider an endofunctor \ensuremath{F : \mathbf{Set} \rightarrow \mathbf{Set}}. This will have two parts: an action on objects, which is simply a set function, and an action on morphisms. If we take \ensuremath{X} to be the input carrier set, then \ensuremath{F\left( X \right)} is essentially the representation of \emph{inputs} to operations you can take with \ensuremath{X}. Then, we have a morphism \ensuremath{\alpha : F\left( X \right) \rightarrow X}, known as the \emph{structure} map, which defines how the operations take place.
 
@@ -57,36 +76,38 @@ So our combined morphism \ensuremath{\alpha : F\left( X \right) \rightarrow X} e
 
 Of course, since \ensuremath{F} is a functor, it must have an action on morphisms as well. In the case of \ensuremath{F\left( X \right) = A \times X + B}, a functor application to a morphism \ensuremath{F\left( X {\rightarrow }^{f} Y \right)} would have type \ensuremath{A \times X + B {\rightarrow }^{F\left( f \right)} A \times Y + B}. It may be useful to think of \ensuremath{F\left( f \right)} as being a coproduct of morphisms \ensuremath{A \times X {\rightarrow }^{{f}_{1}} A \times Y} and \ensuremath{B {\rightarrow }^{{f}_{2}} B}. This is often true for the cases we will be studying, as many of the functors for the common algebras do exhibit this property. However, it may not be true in general, and the categorical framework for algebra allows for functors that mix between the different components. Still, we will use the notation \ensuremath{F\left( f \right) = {f}_{1} + {f}_{2}} in the remainder of the notes.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{\ensuremath{F}-algebra}
-\end{figure}
+\begin{definition}[\ensuremath{F}-algebra]
+ Let \ensuremath{\mathcal{C}} be an ambient category. An \ensuremath{F}-algebra is a pair \ensuremath{\left( X, \alpha : F\left( X \right) \rightarrow X \right)}, where \ensuremath{X \in \mathsf{Ob}\left( \mathcal{C} \right)}, \ensuremath{F} is an endofunctor \ensuremath{\mathcal{C} \rightarrow \mathcal{C}}, and \ensuremath{\alpha : F\left( X \right) \rightarrow X}. 
+\end{definition}
 
 
-This doesn"t cover all of the group properties yet. We are still missing associativity and the inverse laws. Unfortunately, the functor \ensuremath{F} primarily deals with the types of operations in an algebra, also known as the "signature", so the extra laws must be separately required. \footnote{ There is a different construction which generates algebras from a monad, that can encapsulate having these extra axioms, but we won"t really explore that here.  } For example, we will define groups as follows:
+This doesn't cover all of the group properties yet. We are still missing associativity and the inverse laws. Unfortunately, the functor \ensuremath{F} primarily deals with the types of operations in an algebra, also known as the "signature", so the extra laws must be separately required. \footnote{ There is a different construction which generates algebras from a monad, that can encapsulate having these extra axioms, but we won't really explore that here.  } For example, we will define groups as follows:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]}
-\caption{}
-\end{figure}
+\begin{definition}
+A group is an \ensuremath{F}-algebra defined by the signature \[
+F\left( X \right) = 1 + X + X \times X
+\] where the components are named \ensuremath{\left[ e, \mathsf{inv}, \left( \cdot \right) \right]}, such that the following diagrams commute:
+
+\texttt{[unsupported Typst element: context]}
+
+\texttt{[unsupported Typst element: context]}
+
+\texttt{[unsupported Typst element: context]} 
+\end{definition}
 
 
 It turns out there are some interesting \ensuremath{F}-algebras when we consider the category of \ensuremath{F}-algebras themselves. But before we get there, we must first define what it means to have a morphism of \ensuremath{F}-algebras. As is standard in category theory, an \ensuremath{F}-algebra is simply an underlying carrier plus some extra data. We will thus define morphisms as a function between the carrier along with proof of coherence between the data:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{\ensuremath{F}-algebra morphism}
-\end{figure}
- 
+\begin{definition}[\ensuremath{F}-algebra morphism]
+ Let \ensuremath{\left( X, {\alpha }_{X} \right)} and \ensuremath{\left( Y, {\alpha }_{Y} \right)} be two \ensuremath{F}-algebras in a category \ensuremath{\mathcal{C}}. An \ensuremath{F}-algebra morphism is then a morphism \ensuremath{f : X \rightarrow Y} such that the following diagram commutes:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Verify that \ensuremath{F}-algebras form a category.} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\texttt{[unsupported Typst element: context]} 
+\end{definition}
+\label{fAlgMor} 
+
+\begin{exercise}
+Verify that \ensuremath{F}-algebras form a category.
+\end{exercise}
 
 
 Let us now interpret this commutative square in the context of the \ensuremath{F}-algebras generated by each of our group operations above.
@@ -107,7 +128,7 @@ As you can see, the group homomorphism properties fell purely out of just instan
 \subsection{Initial \ensuremath{F}-algebras and induction}
 
 
-We said before that \ensuremath{F\left( X \right)} builds up the input data to be used by \ensuremath{\alpha}. But that"s a rather abstract description. To see an example of how this is used, consider a functor \ensuremath{F\left( X \right) = 1 + X}. We can define an \ensuremath{F}-algebra by providing an \ensuremath{\alpha : F\left( X \right) \rightarrow X}. Expanding the type gives us \ensuremath{\alpha : \left( 1 + X \right) \rightarrow X}, which we can define by cases: \begin{itemize}
+We said before that \ensuremath{F\left( X \right)} builds up the input data to be used by \ensuremath{\alpha}. But that's a rather abstract description. To see an example of how this is used, consider a functor \ensuremath{F\left( X \right) = 1 + X}. We can define an \ensuremath{F}-algebra by providing an \ensuremath{\alpha : F\left( X \right) \rightarrow X}. Expanding the type gives us \ensuremath{\alpha : \left( 1 + X \right) \rightarrow X}, which we can define by cases: \begin{itemize}
 \item \ensuremath{{\alpha }_{1} : 1 \rightarrow X}
 \item \ensuremath{{\alpha }_{X} : X \rightarrow X}
 \end{itemize}
@@ -131,24 +152,20 @@ There is a sense where the initial \ensuremath{\left( F, \alpha \right)} shown a
 \mathsf{natrec} : \left( {y}_{0} : Y \right) \rightarrow \left( {y}_{s} : Y \rightarrow Y \right) \rightarrow \left( \mathbb{N} \rightarrow Y \right)
 \]
 
- If we change \ensuremath{{y}_{0}} to be of type \ensuremath{{1}_{Y} \rightarrow Y} (this is equivalent, it"s just a function that ignores the input), it should be clear that the inputs \ensuremath{{y}_{0}} and \ensuremath{{y}_{s}} represents the two cases of \ensuremath{\beta}. So really, we can reframe this as: given \ensuremath{\beta : 1 + Y \rightarrow Y}, which is the definition of the \ensuremath{F}-algebra you are trying to produce, you get the unique morphism \ensuremath{\mathbb{N} \rightarrow Y} back, since it"s forced by the square.
+ If we change \ensuremath{{y}_{0}} to be of type \ensuremath{{1}_{Y} \rightarrow Y} (this is equivalent, it's just a function that ignores the input), it should be clear that the inputs \ensuremath{{y}_{0}} and \ensuremath{{y}_{s}} represents the two cases of \ensuremath{\beta}. So really, we can reframe this as: given \ensuremath{\beta : 1 + Y \rightarrow Y}, which is the definition of the \ensuremath{F}-algebra you are trying to produce, you get the unique morphism \ensuremath{\mathbb{N} \rightarrow Y} back, since it's forced by the square.
 
  
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Prove that \ensuremath{\mathsf{natrec}} is the unique morphism that makes the above square commute.} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{exercise}
+Prove that \ensuremath{\mathsf{natrec}} is the unique morphism that makes the above square commute.
+\end{exercise}
 
 
 We defined \ensuremath{\mathsf{natrec}} for naturals here, but the idea that the unique catamorphism is the recursor holds for arbitrary \ensuremath{F}-algebras.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Recursor}
-\end{figure}
+\begin{definition}[Recursor]
+ Given some functor \ensuremath{F}, and an initial \ensuremath{F}-algebra \ensuremath{\left( X, \alpha \right)}, the recursor is the unique \ensuremath{F}-algebra morphism to any other \ensuremath{F}-algebra \ensuremath{\left( Y, \beta \right)}. 
+\end{definition}
 
 
 This generalizes to other algebra-shaped structures as well. In fact, \ensuremath{F}-algebras generally build inductive data types. For example, lists are \ensuremath{F\left( X \right) = 1 + A \times X} for \ensuremath{A}-typed lists. The initial object in this category is then the pair \ensuremath{\left( X, \alpha \right)} defined by:
@@ -163,39 +180,33 @@ This generalizes to other algebra-shaped structures as well. In fact, \ensuremat
 \end{itemize}
 
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Define some other common algebraic structures using functors.} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{exercise}
+Define some other common algebraic structures using functors.
+\end{exercise}
 
 
 So without initiality, what we have is only a formula for building some generic objects with this shape. But there is nothing really forcing the objects to take a coproduct shape, or to behave well. In fact, the initiality enforces the self-similarity of the structure map \ensuremath{\alpha}, which we will see in the next section.
 
-\subsection{Lambek"s Theorem}
+\subsection{Lambek's Theorem}
 
 
 There seems to be some parallel between the structure of \ensuremath{F\left( X \right)} and \ensuremath{X} itself. For example, the structure map \ensuremath{\alpha : F\left( X \right) \rightarrow X} seemed to be perfectly split into the same cases as \ensuremath{X} itself. It turns out that this structure map itself is an isomorphism.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Lambek"s theorem}
-\end{figure}
- 
+\begin{theorem}[Lambek's theorem]
+ Given some functor \ensuremath{F} and some \ensuremath{F}-algebra \ensuremath{\left( X, \alpha \right)}. If \ensuremath{\left( X, \alpha \right)} is initial, then \ensuremath{\alpha} is an isomorphism. 
+\end{theorem}
+\label{lambekTheorem} 
 
 \texttt{[unsupported Typst element: context]}
 
-Since \ensuremath{\alpha} is essentially defining the "constructors" of the inductive type defined by \ensuremath{F\left( X \right)}, one consequence of Lambek"s theorem is that all constructors are invertible. For example, we can derive an inverse \ensuremath{\mathsf{suc}} function that takes any \ensuremath{\mathsf{suc}\left( n \right)} and produces \ensuremath{n}.
+Since \ensuremath{\alpha} is essentially defining the "constructors" of the inductive type defined by \ensuremath{F\left( X \right)}, one consequence of Lambek's theorem is that all constructors are invertible. For example, we can derive an inverse \ensuremath{\mathsf{suc}} function that takes any \ensuremath{\mathsf{suc}\left( n \right)} and produces \ensuremath{n}.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Prove that there is no non-empty initial algebra for the functor \ensuremath{F\left( X \right) = A \times X} in \ensuremath{\mathbf{Set}}, for any arbitrary object \ensuremath{A}. What does this mean in English?} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{exercise}
+Prove that there is no non-empty initial algebra for the functor \ensuremath{F\left( X \right) = A \times X} in \ensuremath{\mathbf{Set}}, for any arbitrary object \ensuremath{A}. What does this mean in English?
+\end{exercise}
+\label{noAXinitial} 
 
-\emph{Applying Lambek"s theorem}.  Consider the list example again, \ensuremath{F\left( X \right) = 1 + A \times X}. Let us derive the initial \ensuremath{F}-algebra using Lambek"s theorem. First, Lambek"s theorem tells us that for initial algebras, \ensuremath{X \cong F\left( X \right)} necessarily. Thus, \ensuremath{X \cong 1 + A \times X}. Since this is a fixpoint, we can start unfolding \ensuremath{X} and see what happens:
+\emph{Applying Lambek's theorem}.  Consider the list example again, \ensuremath{F\left( X \right) = 1 + A \times X}. Let us derive the initial \ensuremath{F}-algebra using Lambek's theorem. First, Lambek's theorem tells us that for initial algebras, \ensuremath{X \cong F\left( X \right)} necessarily. Thus, \ensuremath{X \cong 1 + A \times X}. Since this is a fixpoint, we can start unfolding \ensuremath{X} and see what happens:
 
 \[
 \begin{aligned}
@@ -220,48 +231,42 @@ This is a union of \ensuremath{n}-products of \ensuremath{A} for all \ensuremath
 \section{Coalgebra}
 
 
-As we know, we can get dual concepts in category theory for free by reversing the arrows. By dualizing algebras, we get coalgebras. Let"s start with the definition and then try to extract some intuitions from it.
+As we know, we can get dual concepts in category theory for free by reversing the arrows. By dualizing algebras, we get coalgebras. Let's start with the definition and then try to extract some intuitions from it.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{\ensuremath{F}-coalgebra}
-\end{figure}
+\begin{definition}[\ensuremath{F}-coalgebra]
+ Let \ensuremath{\mathcal{C}} be an ambient category. An \ensuremath{F}-coalgebra is a pair \ensuremath{\left( X, \nu \right)} where \ensuremath{X \in \mathsf{Ob}\left( \mathcal{C} \right)}, \ensuremath{F} is an endofunctor \ensuremath{\mathcal{C} \rightarrow \mathcal{C}} and \ensuremath{\nu : X \rightarrow F\left( X \right)}. 
+\end{definition}
 
 
 And as usual, we must also define morphisms:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{\ensuremath{F}-coalgebra morphism}
-\end{figure}
- 
+\begin{definition}[\ensuremath{F}-coalgebra morphism]
+ Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be two \ensuremath{F}-coalgebras in a category \ensuremath{\mathcal{C}}. An \ensuremath{F}-coalgebra morphism is then a morphism \ensuremath{f : X \rightarrow Y} such that the following diagram commutes:
+
+\texttt{[unsupported Typst element: context]} 
+\end{definition}
+\label{fCoalgebraMorphism} 
 
 Similar to how in algebras, we had the intuition of building up some kind of "input data" to our \ensuremath{\alpha} morphism which then represented the constructors for our \ensuremath{X}, we would like to think of coalgebras as functions out of \ensuremath{X}, giving us some \emph{one-step} observation data that may involve \ensuremath{X}.
 
-Let"s work through an example that might solidify this intuition. Once again, we are working temporarily in the category of sets, so let \ensuremath{X} be a set. Consider the endofunctor \ensuremath{F\left( X \right) = 1 + A \times X}. In algebras, this corresponds to the signature for list-y structures.
+Let's work through an example that might solidify this intuition. Once again, we are working temporarily in the category of sets, so let \ensuremath{X} be a set. Consider the endofunctor \ensuremath{F\left( X \right) = 1 + A \times X}. In algebras, this corresponds to the signature for list-y structures.
 
 We will see now what the dual to list-y things are. To complete the definition of an \ensuremath{F}-coalgebra, we need a structure map of type \ensuremath{\nu : X \rightarrow F\left( X \right)}, which when unfolded, is \ensuremath{\nu : X \rightarrow 1 + A \times X}. Whereas in algebras, the structure map served a purpose of consuming the structure into a single \ensuremath{X}, here we have \ensuremath{\nu} expanding the \ensuremath{X} into its observable data.
 
-Our intuition tells us that \ensuremath{X} is supposed to be list-y. So let"s say our \ensuremath{\nu} does case analysis to see if our list is \ensuremath{\mathsf{cons}} or \ensuremath{\mathsf{nil}}. In the case of \ensuremath{\mathsf{cons}}, we return \ensuremath{A \times X}, which is the head and tail separately. In the case of \ensuremath{\mathsf{nil}}, we return \ensuremath{1}. So whereas our \ensuremath{F}-algebra from before was building \emph{up} a list, now our \ensuremath{F}-coalgebra is essentially mapping \emph{out} of a list.
+Our intuition tells us that \ensuremath{X} is supposed to be list-y. So let's say our \ensuremath{\nu} does case analysis to see if our list is \ensuremath{\mathsf{cons}} or \ensuremath{\mathsf{nil}}. In the case of \ensuremath{\mathsf{cons}}, we return \ensuremath{A \times X}, which is the head and tail separately. In the case of \ensuremath{\mathsf{nil}}, we return \ensuremath{1}. So whereas our \ensuremath{F}-algebra from before was building \emph{up} a list, now our \ensuremath{F}-coalgebra is essentially mapping \emph{out} of a list.
 
 Compared to the algebraic version, this one sort of axiomatizes observations out of the list rather than building up the exact list structure. We assume the list exists as a mystery object, and are able to decompose it into an element and "the rest of the stream," which continues being the mystery object.
 
-We also have a version of Lambek"s theorem for coalgebra:
+We also have a version of Lambek's theorem for coalgebra:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Lambek"s theorem for coalgebra}
-\end{figure}
- 
+\begin{theorem}[Lambek's theorem for coalgebra]
+ Given some functor \ensuremath{F} and some \ensuremath{F}-coalgebra \ensuremath{\left( X, \nu \right)}. If \ensuremath{\left( X, \nu \right)} is terminal, then \ensuremath{\nu} is an isomorphism. 
+\end{theorem}
+\label{lambekCoalgebra} 
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Prove \ref{lambekCoalgebra}.} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{exercise}
+Prove \ref{lambekCoalgebra}.
+\end{exercise}
 
 
 Of course, with coalgebraic lists, we could also imagine a situation where we have a definition that continuously returns an element of the \ensuremath{A \times X} side, and never returns the \ensuremath{1}. In this case, the list would never end. We cannot formulate this type using algebraically defined data (\ref{noAXinitial}), but with coalgebraically defined codata, this is completely in bounds. In fact, we may even specify that the stream \emph{cannot} ever end. In this case, we only need to use signature functor \ensuremath{F\left( X \right) = A \times X}, opting not to include the extra \ensuremath{1}. This is useful for reasoning about applications such as servers which are designed to run and continue responding to input forever. In the next section we will discuss the terminal \ensuremath{F}-coalgebra and coinduction.
@@ -269,74 +274,72 @@ Of course, with coalgebraic lists, we could also imagine a situation where we ha
 \subsection{Coinduction and bisimulation}
 
 
-Recall that a terminal object has morphisms into it from every other object. These morphisms are typically called \textbf{anamorphisms}. To see an example, let"s work in \ensuremath{\mathbf{Set}} again, with the stream functor, where \ensuremath{F\left( X \right) = A \times X}, for some type \ensuremath{A}. This represents streams of elements with type \ensuremath{A}.
+Recall that a terminal object has morphisms into it from every other object. These morphisms are typically called \textbf{anamorphisms}. To see an example, let's work in \ensuremath{\mathbf{Set}} again, with the stream functor, where \ensuremath{F\left( X \right) = A \times X}, for some type \ensuremath{A}. This represents streams of elements with type \ensuremath{A}.
 
 We can use \ref{lambekCoalgebra} to derive what the terminal coalgebra should look like. Starting with \ensuremath{X \cong A \times X}, we can unfold several times to get \ensuremath{X \cong A \times A \times A \times \ldots}. This is an unending product of \ensuremath{A} by itself, which is the same as the function space \ensuremath{\mathbb{N} \rightarrow A}. We can also write this as \ensuremath{{A}^{\mathbb{N} }}, using exponential notation for functions.
 
-Next is to define the structure map, \ensuremath{{\nu }_{X} : X \rightarrow A \times X}. Of course, we don"t really have a choice in this matter either – it must follow from the terminality conditions. An obvious choice would be to just pick the head and tail and return that as a pair.
+Next is to define the structure map, \ensuremath{{\nu }_{X} : X \rightarrow A \times X}. Of course, we don't really have a choice in this matter either – it must follow from the terminality conditions. An obvious choice would be to just pick the head and tail and return that as a pair.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{definition}
+The structure map for the terminal \ensuremath{F}-coalgebra defined by \ensuremath{F\left( X \right) = A \times X} is \[
+\begin{aligned}
+{\nu }_{X} & : X \rightarrow A \times X \\ {\nu }_{X} \left( \left( {a}_{0}, {a}_{1}, {a}_{2}, \ldots \right) \right) & = {a}_{0}, \left( {a}_{1}, {a}_{2}, \ldots \right)
+\end{aligned}
+\]
+\end{definition}
+\label{reassociateHeadTail} 
 
 But does this choice work? We must check that all the rules are satisfied.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{lemma}
+ For any \ensuremath{F}-coalgebra \ensuremath{\left( Y, {\nu }_{Y} \right)}, there exists a morphism \ensuremath{f : \left( Y, {\nu }_{Y} \right) \rightarrow \left( X, {\nu }_{X} \right)}. 
+\end{lemma}
+\label{fExists} 
 
 \texttt{[unsupported Typst element: context]}
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{lemma}
+The morphism \ensuremath{f} defined in \ref{fExists} is unique.
+\end{lemma}
+\label{fUnique} 
 
-For this, we"ll need to use a different kind of reasoning than before. We will have to use \textbf{coinduction}, which is dual to induction and is perfect for working with codata such as streams.
+For this, we'll need to use a different kind of reasoning than before. We will have to use \textbf{coinduction}, which is dual to induction and is perfect for working with codata such as streams.
 
 \texttt{[unsupported Typst element: context]}
 
 In the above proof, we used function extensionality to show that \ensuremath{f} and \ensuremath{g} are equal. But for showing two coalgebra are "the same," it is often more convenient to use a weaker notion of equivalence. A classic example is of automata, which we will see more about in a later section. It is completely sensical to have two automata that capture the same language (yielding the same transitions), yet have different non-reconcilable states. For this, we will introduce bisimulation.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Bisimulation of streams}
-\end{figure}
- 
+\begin{definition}[Bisimulation of streams]
+ Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be \ensuremath{F}-coalgebras, where \ensuremath{F\left( X \right) = A \times X}. Let \ensuremath{R} be a relation between \ensuremath{X} and \ensuremath{Y} – specifically, \ensuremath{R \subset X \times Y}. \ensuremath{R} is a \textbf{bisimulation} iff for any \ensuremath{\left( x, y \right) \in R}:
 
-Then, it is said that \ensuremath{X} and \ensuremath{Y} are \textbf{bisimilar}. This sort of looks like a more generalized version of the reasoning we did as a part of the uniqueness proof, but with equality replaced with the relation \ensuremath{R}. But the reasoning is still stream-specific, and relatively ad-hoc. We"d like to not have to make arbitrary bisimulation conditions for every type we"d like to analyze.
+\[
+\mathsf{head}\left( x \right) = \mathsf{head}\left( y \right) \land \left( \mathsf{tail}\left( x \right), \mathsf{tail}\left( y \right) \right) \in R
+\] 
+\end{definition}
+\label{bisimulationOfStreams} 
+
+Then, it is said that \ensuremath{X} and \ensuremath{Y} are \textbf{bisimilar}. This sort of looks like a more generalized version of the reasoning we did as a part of the uniqueness proof, but with equality replaced with the relation \ensuremath{R}. But the reasoning is still stream-specific, and relatively ad-hoc. We'd like to not have to make arbitrary bisimulation conditions for every type we'd like to analyze.
 
 It turns out if we just take everything that has specifically to do with streams and abstract it, we can arrive at a more general notion of bisimulation.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Aczel-Mendler bisimulation}
-\end{figure}
- 
+\begin{definition}[Aczel-Mendler bisimulation]
+ Let \ensuremath{\mathcal{C}} be a category with products, and \ensuremath{F : \mathcal{C} \rightarrow \mathcal{C}} be an endofunctor. Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be \ensuremath{F}-coalgebras. Let \ensuremath{R} be a subobject of the product object \ensuremath{X \times Y} with projection morphisms \ensuremath{{\pi }_{X}} and \ensuremath{{\pi }_{Y}} such that there exists a morphism \ensuremath{{\nu }_{R} : R \rightarrow F\left( R \right)} such that the following diagram commutes:
 
-Let"s quickly make sense of this in the context of our previous \ref{bisimulationOfStreams} again. We have some relation \ensuremath{R} which is a subobject of the product. This corresponds exactly with \ensuremath{R \subset X \times Y}. The rough interpretation of this is that at the current state, \ensuremath{X} and \ensuremath{Y} are related through \ensuremath{R}.
+ \texttt{[unsupported Typst element: context]} 
+\end{definition}
+\label{genericBisimulation} 
 
-Then, we have the object \ensuremath{F\left( R \right)}, which is a lift of the product through \ensuremath{F}. So for streams, since \ensuremath{F\left( X \right) = A \times X}, we have \ensuremath{F\left( R \right) \subset \left( A \times X \right) \times \left( A \times Y \right)}. Notice how this part is completely determined by the specific \ensuremath{F}"s interaction with the relation. The \ensuremath{{\nu }_{R}} lifting operation simply calls \ensuremath{\mathsf{head}} and \ensuremath{\mathsf{tail}} component-wise on both the left and right sides. Then, the \ensuremath{F\left( {\pi }_{1} \right)} projection operator would grab the components separately and turn them into a product, and \ensuremath{F\left( {\pi }_{2} \right)} does the corresponding thing for \ensuremath{F\left( Y \right)}.
+Let's quickly make sense of this in the context of our previous \ref{bisimulationOfStreams} again. We have some relation \ensuremath{R} which is a subobject of the product. This corresponds exactly with \ensuremath{R \subset X \times Y}. The rough interpretation of this is that at the current state, \ensuremath{X} and \ensuremath{Y} are related through \ensuremath{R}.
+
+Then, we have the object \ensuremath{F\left( R \right)}, which is a lift of the product through \ensuremath{F}. So for streams, since \ensuremath{F\left( X \right) = A \times X}, we have \ensuremath{F\left( R \right) \subset \left( A \times X \right) \times \left( A \times Y \right)}. Notice how this part is completely determined by the specific \ensuremath{F}'s interaction with the relation. The \ensuremath{{\nu }_{R}} lifting operation simply calls \ensuremath{\mathsf{head}} and \ensuremath{\mathsf{tail}} component-wise on both the left and right sides. Then, the \ensuremath{F\left( {\pi }_{1} \right)} projection operator would grab the components separately and turn them into a product, and \ensuremath{F\left( {\pi }_{2} \right)} does the corresponding thing for \ensuremath{F\left( Y \right)}.
 
 The commuting squares, like earlier, essentially force us to take this component-wise motion.
 
 
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Does the category of \ensuremath{F}-algebras have an initial object for any \ensuremath{F}? Does the category of \ensuremath{F}-coalgebras have a terminal object for any \ensuremath{F}?} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{exercise}
+Does the category of \ensuremath{F}-algebras have an initial object for any \ensuremath{F}? Does the category of \ensuremath{F}-coalgebras have a terminal object for any \ensuremath{F}?
+\end{exercise}
 
 
 
@@ -346,13 +349,17 @@ The commuting squares, like earlier, essentially force us to take this component
 
 We have been working a lot with streams so far, so from here on we will be introducing some richer coalgebras that have applications in other fields. Automata are a classic example of coalgebras in practice. At a high level, an automaton is a state machine that has states and transitions between them. It has a notion of "accept" states which allow the machine to respond with a success response. This is often used in recognizing languages, such as in parsing for compiler development, but also for network protocols and hardware state machines.
 
-We"ll look at how automata can be abstracted using algebras and coalgebras, and then work through a generalization of Brzozowski"s minimization algorithm using our definition, in order to see how to use the duality of algebras and coalgebras in order to achieve minimization. Let"s start with a formal definition of automata.
+We'll look at how automata can be abstracted using algebras and coalgebras, and then work through a generalization of Brzozowski's minimization algorithm using our definition, in order to see how to use the duality of algebras and coalgebras in order to achieve minimization. Let's start with a formal definition of automata.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Deterministic automaton}
-\end{figure}
+\begin{definition}[Deterministic automaton]
+ For some alphabet \ensuremath{\Sigma}, a \textbf{deterministic automaton (DA)} is a 4-tuple \ensuremath{\left( Q, \delta , i, F \right)}: \begin{itemize}
+\item \ensuremath{Q}, a set of states
+\item \ensuremath{\delta : Q \times \Sigma \rightarrow Q}, a transition map
+\item \ensuremath{i \in Q}, an initial state
+\item \ensuremath{F \subseteq Q}, final states
+\end{itemize}
+
+\end{definition}
 
 
 Visually, we can represent an automaton like this:
@@ -374,11 +381,15 @@ Formally, a language \ensuremath{\mathcal{L}} is just a series of strings consis
 
 There is also a variant which allows non-deterministic transitions – for example, it would be allowed to have multiple arrows from the same state with the same transition. This machine is known as a \emph{non-deterministic} automaton.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Non-deterministic automaton}
-\end{figure}
+\begin{definition}[Non-deterministic automaton]
+ For some alphabet \ensuremath{\Sigma}, a \textbf{non-deterministic automaton} is a 4-tuple \ensuremath{\left( Q, \delta , i, F \right)}: \begin{itemize}
+\item \ensuremath{Q}, a set of states
+\item \ensuremath{\delta : Q \times \Sigma \rightarrow \mathcal{P}\left( Q \right)}, a transition map
+\item \ensuremath{i \in Q}, an initial state
+\item \ensuremath{F \subseteq Q}, final states
+\end{itemize}
+
+\end{definition}
 
 
 The \ensuremath{\delta} is the only difference from the DA definition. Instead of only transitioning to one state, it could possibly transition to any number of states. A non-deterministic automata would accept a string from a language if taking any path using the symbols of the string would result in acceptance.
@@ -389,136 +400,141 @@ For this section, we will consider a particular problem concerning automata: the
 
 \texttt{[unsupported Typst element: context]}
 
-You could easily imagine collapsing all of these down to a single node. Due to this, there are several minimization algorithms. A well-known algorithm, due to Brzozowski, involves reversing the NFA, determinizing it using the powerset construction, and then reversing it again. In this next section, we will investigate a category-theoretic approach by \ref{bonchiAlgebracoalgebraDualityBrzozowskis2014} to show why this works, specifically for the case of deterministic automata.
+You could easily imagine collapsing all of these down to a single node. Due to this, there are several minimization algorithms. A well-known algorithm, due to Brzozowski, involves reversing the NFA, determinizing it using the powerset construction, and then reversing it again. In this next section, we will investigate a category-theoretic approach by \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} to show why this works, specifically for the case of deterministic automata.
 
 \subsection{The category of automata}
 
 
 In order to categorify automata, we must first identify a category. We want the objects to be automata, so we must define some morphisms.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Automaton morphism}
-\end{figure}
+\begin{definition}[Automaton morphism]
+ For some alphabet \ensuremath{\Sigma}, a morphism between two automata \ensuremath{\left( {Q}_{1}, {\delta }_{1}, {i}_{1}, {F}_{1} \right)} and \ensuremath{\left( {Q}_{2}, {\delta }_{2}, {i}_{2}, {F}_{2} \right)} is defined as a function \ensuremath{f : {Q}_{1} \rightarrow {Q}_{2}} such that the following hold:
+
+\begin{itemize}
+\item \ensuremath{f} commutes with the transition map, or in other words, for any \ensuremath{s \in \Sigma}, this square commutes: \texttt{[unsupported Typst element: context]}
+\item \ensuremath{f} preserves the initial state, or in other words \ensuremath{f\left( {i}_{1} \right) = {i}_{2}}
+\item \ensuremath{f} preserves the final states, or in other words \ensuremath{f\left( q \right) \in {F}_{2}} for all \ensuremath{q \in {F}_{1}}
+\end{itemize}
+
+
  
+\end{definition}
+\label{automatonMorphism} 
 
 Thus, we can form a category of DAs:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Category of deterministic automata, \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}}
-\end{figure}
+\begin{definition}[Category of deterministic automata, \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}]
+ For some alphabet \ensuremath{\Sigma} and language over that alphabet \ensuremath{\mathcal{L}}, the category \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} is defined as a category where: \begin{itemize}
+\item objects are DAs that recognize the language \ensuremath{\mathcal{L}}
+\item morphisms are defined as in \ref{automatonMorphism}
+\end{itemize}
+
+\end{definition}
 
 
-It"s important that the category itself is parameterized by a language \ensuremath{\mathcal{L}}, since morphisms need to preserve the language. If this was not the case, then we could not have initial or final objects at all – it would essentially require that all automata at all recognize the same language, which is not the case. Such a category would still exist, and in fact \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} is a subcategory of that category, but it is not useful to us.
+It's important that the category itself is parameterized by a language \ensuremath{\mathcal{L}}, since morphisms need to preserve the language. If this was not the case, then we could not have initial or final objects at all – it would essentially require that all automata at all recognize the same language, which is not the case. Such a category would still exist, and in fact \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} is a subcategory of that category, but it is not useful to us.
 
 \texttt{[unsupported Typst element: context]}
 
 \subsection{Minimality of automata}
 
 
-Next, let us consider the initial and terminal objects of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. We"d like to determine some automaton that recognizes \ensuremath{\mathcal{L}} and has a morphism to every other automaton. A pretty trivial "maximal" object that lets us do this is to add every single possible word as a state.
+Next, let us consider the initial and terminal objects of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. We'd like to determine some automaton that recognizes \ensuremath{\mathcal{L}} and has a morphism to every other automaton. A pretty trivial "maximal" object that lets us do this is to add every single possible word as a state.
 
-Formally, let"s define this automaton:
+Formally, let's define this automaton:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Initial object of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}}
-\end{figure}
+\begin{definition}[Initial object of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}]
+ Define the initial automaton \ensuremath{\mathsf{Init}} as: \begin{itemize}
+\item \ensuremath{{Q}_{\mathsf{Init}}} is defined as \ensuremath{{\Sigma }^{∗}}, the set of all strings over the alphabet \ensuremath{\Sigma}
+\item \ensuremath{{\delta }_{\mathsf{Init}} : Q \times \Sigma \rightarrow Q} simply concatenates the currently running state's string with the transition symbol
+\item \ensuremath{{i}_{\mathsf{Init}}} is the state corresponding to the empty string
+\item \ensuremath{{F}_{\mathsf{Init}}} are the states corresponding to all strings in \ensuremath{\mathcal{L}}
+\end{itemize}
+
+\end{definition}
 
 
 Of course, we must show that it is in fact initial.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{theorem}
+The automaton described above is initial in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}.
+\end{theorem}
 
 
 \texttt{[unsupported Typst element: context]}
 
 \texttt{[unsupported Typst element: context]}
 
-The rough design of this morphism is that for some arbitrary automaton \ensuremath{Q}, we"re running every possible string in \ensuremath{{\Sigma }^{∗}} to see which states are able to be reached via \ensuremath{Q}, and capturing that in a single function \ensuremath{f}.
+The rough design of this morphism is that for some arbitrary automaton \ensuremath{Q}, we're running every possible string in \ensuremath{{\Sigma }^{∗}} to see which states are able to be reached via \ensuremath{Q}, and capturing that in a single function \ensuremath{f}.
 
-We"re interested specifically in automata where every state is reachable. This means there"s no redundancies in the states – if you had some redundant state that isn"t final, then only running \ensuremath{\delta} until completion would completely miss that state, excluding it from the image of the morphism out of the initial automaton. We capture this with the following definition:
+We're interested specifically in automata where every state is reachable. This means there's no redundancies in the states – if you had some redundant state that isn't final, then only running \ensuremath{\delta} until completion would completely miss that state, excluding it from the image of the morphism out of the initial automaton. We capture this with the following definition:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Reachable automaton}
-\end{figure}
- 
+\begin{definition}[Reachable automaton]
+ An automaton \ensuremath{Q} is \textbf{reachable} if the unique morphism out of the initial automaton \ensuremath{\mathsf{Init} \rightarrow Q} is an epimorphism. 
+\end{definition}
+\label{reachableAutomaton} 
 
 In sets, epimorphisms (set functions) capture the notion of surjectivity, which means every element of the codomain has a pre-image. Since automata are essentially sets with more structure, a morphism being epic captures the same notion, which in automata corresponds to every state being reached by a morphism. If this property is true of the morphism out of the initial automaton (which remember, runs every possible string through the automaton), we know every state is being used, which captures our desired property of reachability.
 
-There is a similar construction on the coalgebraic side. We can imagine a terminal automaton, which has morphisms going into it from any other automaton. For some arbitrary automaton \ensuremath{Q}, we"d imagine that the result of a morphism should be some \emph{observation} of the states in \ensuremath{Q}. So the terminal automaton should be a collective observation about all possible automata in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}.
+There is a similar construction on the coalgebraic side. We can imagine a terminal automaton, which has morphisms going into it from any other automaton. For some arbitrary automaton \ensuremath{Q}, we'd imagine that the result of a morphism should be some \emph{observation} of the states in \ensuremath{Q}. So the terminal automaton should be a collective observation about all possible automata in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Terminal object in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}}
-\end{figure}
+\begin{definition}[Terminal object in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}]
+ The terminal automaton \ensuremath{\mathsf{Term}} is defined as: \begin{itemize}
+\item \ensuremath{{Q}_{\mathsf{Term}}} is the set of all possible subsets of \ensuremath{{\Sigma }^{∗}}. This represents all languages that could possibly be recognized for this alphabet.
+\item \ensuremath{{\delta }_{\mathsf{Term}} : Q \times \Sigma \rightarrow Q} maps every \ensuremath{\left( q, s \right) \in Q \times \Sigma} to the state representing the remainder of the language after consuming the prefix \ensuremath{s}. This is also known as the \emph{Brzozowski derivative}.
+\item \ensuremath{{i}_{\mathsf{Term}}} is the language \ensuremath{\mathcal{L}}.
+\item \ensuremath{{F}_{\mathsf{Term}}} is the set of all languages that contain the empty string \ensuremath{\epsilon}.
+\end{itemize}
 
-
-Staring at this definition, it may kind of make sense why this could capture all observations, but let"s make this concrete by actually proving terminality.
-
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\end{definition}
 
 
-\texttt{[unsupported Typst element: context]}
+Staring at this definition, it may kind of make sense why this could capture all observations, but let's make this concrete by actually proving terminality.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Verify that \ensuremath{f} satisfies the requirements for being a \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}-morphism.} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{theorem}
+The automaton described above is final in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}.
+\end{theorem}
 
 
 \texttt{[unsupported Typst element: context]}
 
-The rough design for this morphism is that we"re mapping the automaton to what language it recognizes, inside of \ensuremath{\mathsf{Term}}. In that sense, this morphism would capture the behavior of all the strings that could possibly be recognized by the automaton.
+\begin{exercise}
+Verify that \ensuremath{f} satisfies the requirements for being a \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}-morphism.
+\end{exercise}
 
-This captures another important property, which is that every state is distinct. Without this property, you could have two states which recognize the same suffix language. That wouldn"t be very minimal. For minimality, we care specifically that there are no duplicate states that can just be merged. This can be captured by the definition of observability, which is dual to \ref{reachableAutomaton}:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Observable automaton}
-\end{figure}
- 
+\texttt{[unsupported Typst element: context]}
+
+The rough design for this morphism is that we're mapping the automaton to what language it recognizes, inside of \ensuremath{\mathsf{Term}}. In that sense, this morphism would capture the behavior of all the strings that could possibly be recognized by the automaton.
+
+This captures another important property, which is that every state is distinct. Without this property, you could have two states which recognize the same suffix language. That wouldn't be very minimal. For minimality, we care specifically that there are no duplicate states that can just be merged. This can be captured by the definition of observability, which is dual to \ref{reachableAutomaton}:
+
+\begin{definition}[Observable automaton]
+ An automaton \ensuremath{Q} is \textbf{observable} if the unique morphism into the terminal automaton \ensuremath{Q \rightarrow \mathsf{Term}} is a monomorphism. 
+\end{definition}
+\label{observableAutomaton} 
 
 Again, to make a comparison to sets, a set function is monic if it is injective, or that distinct inputs map to distinct outputs. Thus, a morphism in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} is monic if it maps distinct input states to distinct output states. If our output state is the terminal automaton, then two states mapping into the same output state means that they recognized the same language, which would mean they were duplicated.
 
 Putting these together, we can finally define what a minimal automaton is:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Minimal automaton}
-\end{figure}
- 
+\begin{definition}[Minimal automaton]
+ An automaton \ensuremath{Q} is \textbf{minimal} if it is both \href{}{reachable} and \href{}{observable}. 
+\end{definition}
+\label{minimalAutomaton} 
 
-The reachability property enforces that no states can be deleted, and the observability property enforces that no states can be merged, at least without changing the language being recognized. These are the only two ways to reduce an automaton without changing the language. This claim could be justified by the fact that the definition of minimization used above coincides with the minimization definition for a coalgebra defined through epi-mono factorization \ref{bezhanishviliMinimizationDuality2012}.
+The reachability property enforces that no states can be deleted, and the observability property enforces that no states can be merged, at least without changing the language being recognized. These are the only two ways to reduce an automaton without changing the language. This claim could be justified by the fact that the definition of minimization used above coincides with the minimization definition for a coalgebra defined through epi-mono factorization \cite{bezhanishviliMinimizationDuality2012}.
 
-On the computation side of things, reachability is pretty trivial to compute algorithmically – just traverse the state machine and grab all the states visited. On the other hand, observability requires quotienting by equivalence classes of a hard-to-compute property of basically \emph{every} state. In practice, algorithms such as Hopcroft"s algorithm optimize this by incrementally comparing states and quotienting as you go.
+On the computation side of things, reachability is pretty trivial to compute algorithmically – just traverse the state machine and grab all the states visited. On the other hand, observability requires quotienting by equivalence classes of a hard-to-compute property of basically \emph{every} state. In practice, algorithms such as Hopcroft's algorithm optimize this by incrementally comparing states and quotienting as you go.
 
 \subsection{Reversing automata}
 
 
-The crux of Brzozowski"s minimization algorithm involves reversing the automaton. The intuition here is, if reachability is more straightforward, we should aim to do it. Then, we can find some dualization property that allows us to somehow transfer reachability of an automaton into observability of the reverse language, and then use reachability \emph{again} to get both desired properties on the same language.
+The crux of Brzozowski's minimization algorithm involves reversing the automaton. The intuition here is, if reachability is more straightforward, we should aim to do it. Then, we can find some dualization property that allows us to somehow transfer reachability of an automaton into observability of the reverse language, and then use reachability \emph{again} to get both desired properties on the same language.
 
 The actual reversal process amounts to reversing the arrows of the transition map, as well as exchanging the initial and final states. Note that normally, when you do this to a deterministic automaton, it becomes a \emph{non-deterministic} one. This is because there could be multiple final states, but only one initial state. When you reverse it, you have a number of initial states. The algorithm requires that you then make the non-deterministic automaton deterministic, through the powerset construction.
 
-We"ll explore a construction which combines the reversing and powersetting in one go. First off, consider what the shape of output we want is, since this will guide our type-checking as we hone in towards a solution. We are starting off with a category \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} of deterministic automata, and we are trying to get some way of taking each object and obtaining the reverse automata.
+We'll explore a construction which combines the reversing and powersetting in one go. First off, consider what the shape of output we want is, since this will guide our type-checking as we hone in towards a solution. We are starting off with a category \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} of deterministic automata, and we are trying to get some way of taking each object and obtaining the reverse automata.
 
 Notice that the reverse automata will necessarily recognize the reverse language. So the output will be an automaton which recognizes \ensuremath{\mathsf{rev}\left( \mathcal{L} \right)}, in other words an object in \ensuremath{{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}! This makes it necessary for us to provide a \emph{functor} with this signature:
 
@@ -528,33 +544,33 @@ Notice that the reverse automata will necessarily recognize the reverse language
 
 As always, we need to find a functor, because the rules governing morphisms will restrict the way the objects can even be mapped to only well-behaved maps. Otherwise, we could produce some degenerate maps. This will also give us more benefits, as we will see later.
 
-Time to define action on objects. For some arbitrary object \ensuremath{Q \in {\mathsf{DA}}_{\mathcal{L}}}, we"d like to produce the reverse automaton. We can start with what we expect \ensuremath{{\delta }_{{Q}^{'}}}, the \ensuremath{\delta} of the transformed automaton to be. It should be some sort of reversing function, so we should be taking the pre-image of \ensuremath{{\delta }_{Q}}:
+Time to define action on objects. For some arbitrary object \ensuremath{Q \in {\mathsf{DA}}_{\mathcal{L}}}, we'd like to produce the reverse automaton. We can start with what we expect \ensuremath{{\delta }_{{Q}^{'}}}, the \ensuremath{\delta} of the transformed automaton to be. It should be some sort of reversing function, so we should be taking the pre-image of \ensuremath{{\delta }_{Q}}:
 
 \[
 {\delta }_{{Q}^{'}} :\equiv \left( q, s \right) \mapsto \left\{ {q}^{'} \in Q | \delta \left( {q}^{'}, s \right) = q \right\}
 \]
 
-But this doesn"t type-check. The result is a set, since multiple \ensuremath{{q}^{'}}s could map to the same \ensuremath{q} under the old \ensuremath{\delta}. This means our state space fundamentally needs to be a powerset of \ensuremath{Q}. In that case, \ensuremath{{\delta }_{{Q}^{'}}}"s type would need to be \ensuremath{\mathcal{P}\left( Q \right) \times \Sigma \rightarrow \mathcal{P}\left( Q \right)}. We can update the function to look like this:
+But this doesn't type-check. The result is a set, since multiple \ensuremath{{q}^{'}}s could map to the same \ensuremath{q} under the old \ensuremath{\delta}. This means our state space fundamentally needs to be a powerset of \ensuremath{Q}. In that case, \ensuremath{{\delta }_{{Q}^{'}}}'s type would need to be \ensuremath{\mathcal{P}\left( Q \right) \times \Sigma \rightarrow \mathcal{P}\left( Q \right)}. We can update the function to look like this:
 
 \[
 {\delta }_{{Q}^{'}} :\equiv \left( q, s \right) \mapsto \left\{ {q}^{'} \in Q | \delta \left( {q}^{'}, s \right) \in q \right\}
-\] 
+\]\label{preImageDelta} 
 
 We can essentially fill in the rest of the definitions now:
 
 \begin{itemize}
-\item \ensuremath{{Q}^{'}}"s state space is \ensuremath{\mathcal{P}\left( Q \right)}
+\item \ensuremath{{Q}^{'}}'s state space is \ensuremath{\mathcal{P}\left( Q \right)}
 \item \ensuremath{{\delta }_{{Q}^{'}}} was defined above
 \item \ensuremath{{i}_{{Q}^{'}}} is the set containing all the final states in \ensuremath{Q}
 \item \ensuremath{{F}_{{Q}^{'}}} is the set containing the initial state in \ensuremath{Q}
 \end{itemize}
 
 
-Here is where the magic happens. The function \ensuremath{{\delta }_{Q}} is essentially a function over sets. Even though it"s doing \ensuremath{Q \times \Sigma \rightarrow Q}, this is equivalent to \ensuremath{Q \rightarrow \left( \Sigma \rightarrow Q \right)}, which is \ensuremath{Q \rightarrow {Q}^{\Sigma }}. Over in our reverse language, we have \ensuremath{{\delta }_{{Q}^{'}}} having type \ensuremath{\mathcal{P}\left( Q \right) \times \Sigma \rightarrow \mathcal{P}\left( Q \right)}, which is the same as \ensuremath{\mathcal{P}\left( Q \right) \rightarrow {\mathcal{P}\left( Q \right)}^{\Sigma }}.
+Here is where the magic happens. The function \ensuremath{{\delta }_{Q}} is essentially a function over sets. Even though it's doing \ensuremath{Q \times \Sigma \rightarrow Q}, this is equivalent to \ensuremath{Q \rightarrow \left( \Sigma \rightarrow Q \right)}, which is \ensuremath{Q \rightarrow {Q}^{\Sigma }}. Over in our reverse language, we have \ensuremath{{\delta }_{{Q}^{'}}} having type \ensuremath{\mathcal{P}\left( Q \right) \times \Sigma \rightarrow \mathcal{P}\left( Q \right)}, which is the same as \ensuremath{\mathcal{P}\left( Q \right) \rightarrow {\mathcal{P}\left( Q \right)}^{\Sigma }}.
 
 \textbf{This is exactly the behavior of the contravariant power functor!}
 
-Let"s step back one step and build up to this insight. If we just considered the category of sets \ensuremath{\mathbf{Set}}, the \emph{powerset functor} \ensuremath{\mathcal{P} : \mathbf{Set} \rightarrow \mathbf{Set}} maps every set \ensuremath{X} to its power set \ensuremath{\mathcal{P}\left( X \right)}. In particular, for morphisms, it has type \ensuremath{\mathcal{P}\left( X {\rightarrow }^{f} Y \right) : \mathcal{P}\left( X \right) \rightarrow \mathcal{P}\left( Y \right)}. For any subset of \ensuremath{X}, it maps \ensuremath{f} restricted to that subset to obtain an image that is in the subset of \ensuremath{Y}.
+Let's step back one step and build up to this insight. If we just considered the category of sets \ensuremath{\mathbf{Set}}, the \emph{powerset functor} \ensuremath{\mathcal{P} : \mathbf{Set} \rightarrow \mathbf{Set}} maps every set \ensuremath{X} to its power set \ensuremath{\mathcal{P}\left( X \right)}. In particular, for morphisms, it has type \ensuremath{\mathcal{P}\left( X {\rightarrow }^{f} Y \right) : \mathcal{P}\left( X \right) \rightarrow \mathcal{P}\left( Y \right)}. For any subset of \ensuremath{X}, it maps \ensuremath{f} restricted to that subset to obtain an image that is in the subset of \ensuremath{Y}.
 
 There is also a contravariant version, which we will denote \ensuremath{{\mathcal{P}}^{∗} : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. In particular, the action on morphisms has type \ensuremath{{\mathcal{P}}^{∗} \left( X {\rightarrow }^{f} Y \right) : \mathcal{P}\left( Y \right) \rightarrow \mathcal{P}\left( X \right)}. This action maps a subset of \ensuremath{Y} into the \emph{pre-image} under \ensuremath{f}, which is a subset of \ensuremath{X}.
 
@@ -566,12 +582,10 @@ U\left( Q \right) {\rightarrow }^{{\mathcal{P}}^{∗}} U\left( {Q}^{'} \right)
 
 Here we introduce a powerful property of the contravariant powerset functor:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{lemma}
+The contravariant powerset functor \ensuremath{{\mathcal{P}}^{∗}} is left adjoint to its own opposite functor \ensuremath{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}.
+\end{lemma}
+\label{contrPowerSetSelfDual} 
 
 \texttt{[unsupported Typst element: context]}
 
@@ -583,14 +597,24 @@ We will devise a functor called \ensuremath{\overline{2}}, which is self-dual, t
 
 \texttt{[unsupported Typst element: context]}
 
-This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{∗}} into \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. The paper \ref{bonchiAlgebracoalgebraDualityBrzozowskis2014} notes that this lifting is true generically
+This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{∗}} into \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. The paper \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} notes that this lifting is true generically
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Self-dual powerset functor lift}
-\end{figure}
- 
+\begin{definition}[Self-dual powerset functor lift]
+ Define the functor \ensuremath{\overline{2} : {\mathsf{DA}}_{\mathcal{L}} \rightarrow {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}}} as:
+
+\begin{itemize}
+\item action on objects: \ensuremath{\overline{2}\left( Q \right)} applies the contravariant powerset functor to all components of the automaton: \begin{itemize}
+\item \ensuremath{Q} is transformed into the power set of states \ensuremath{\mathcal{P}\left( Q \right)}
+\item \ensuremath{{\delta }_{Q}} is transformed into the pre-image map as described in \ref{preImageDelta}. Note that this recognizes the reverse language.
+\item \ensuremath{{i}_{Q}} is transformed into the set of all final states
+\item \ensuremath{{F}_{Q}} is transformed into the set of all initial states
+\end{itemize}
+
+\item action on morphisms maps a morphism \ensuremath{{Q}_{1} {\rightarrow }^{f} {Q}_{2}} to its inverse mapping \ensuremath{\mathcal{P}\left( {Q}_{2} \right) {\rightarrow }^{\overline{\mathcal{P}}\left( f \right)} \mathcal{P}\left( {Q}_{1} \right)}
+\end{itemize}
+
+\end{definition}
+\label{F2Def} 
 
 \texttt{[unsupported Typst element: context]}
 
@@ -610,29 +634,27 @@ Since minimal automata are ones that are both reachable and observable, it must 
 
 The arrows between them represent inclusion functors. In fact, these are a special kind of subcategory known as a \emph{reflective} (and \emph{co-reflective}) subcategory. For reflective subcategories, this means that the inclusion functor has a left adjoint. Dually, for co-reflective subcategories, this means that the inclusion functor has a right adjoint. Let us see why this holds.
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{theorem}
+\ensuremath{{\mathsf{rDA}}_{\mathcal{L}}} is a co-reflective subcategory of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. In other words, supposing \ensuremath{I : {\mathsf{rDA}}_{\mathcal{L}} ↪︎ {\mathsf{DA}}_{\mathcal{L}}} is the inclusion functor, there exists a functor \ensuremath{R : {\mathsf{DA}}_{\mathcal{L}} \rightarrow {\mathsf{rDA}}_{\mathcal{L}}} such that \[
+I \dashv R
+\]
+\end{theorem}
+\label{rDALCoreflectiveSubcategory} 
 
 \texttt{[unsupported Typst element: context]}
 
 Similarly, for \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}:
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
- 
+\begin{theorem}
+\ensuremath{{\mathsf{oDA}}_{\mathcal{L}}} is a reflective subcategory of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. In other words, supposing \ensuremath{I : {\mathsf{oDA}}_{\mathcal{L}} ↪︎ {\mathsf{DA}}_{\mathcal{L}}} is the inclusion functor, there exists a functor \ensuremath{O : {\mathsf{DA}}_{\mathcal{L}} \rightarrow {\mathsf{oDA}}_{\mathcal{L}}} such that \[
+O \dashv I
+\]
+\end{theorem}
+\label{oDALReflectiveSubcategory} 
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \textbf{Exercise \texttt{[unsupported Typst element: context]}.} \emph{Prove \ref{oDALReflectiveSubcategory}. The proof should look mostly like a dualization of the proof of \ref{rDALCoreflectiveSubcategory}.} \texttt{[unsupported Typst element: metadata]}  
-\caption{}
-\end{figure}
+\begin{exercise}
+Prove \ref{oDALReflectiveSubcategory}. The proof should look mostly like a dualization of the proof of \ref{rDALCoreflectiveSubcategory}.
+\end{exercise}
 
 
 The corresponding adjoint functor for \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}}, called \ensuremath{R}, then restricts automata in the input category to their reachable subset. Similarly, the corresponding adjoint functor for \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}, called \ensuremath{O}, restricts automata in \emph{its} input category to their observable subset. And then at the bottom, \ensuremath{{\mathsf{mDA}}_{\mathcal{L}}} is both a reflective subcategory and co-reflective subcategory of \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}} and \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}}, respectively. Let us update the diamond diagram to see these new functors:
@@ -643,11 +665,11 @@ Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a funct
 
 \texttt{[unsupported Typst element: context]}
 
-\begin{figure}[htbp]
-\centering
-\texttt{[unsupported Typst element: metadata]} \texttt{[unsupported Typst element: context]} \texttt{[unsupported Typst element: metadata]}  
-\caption{Brzozowski minimization algorithm}
-\end{figure}
+\begin{theorem}[Brzozowski minimization algorithm]
+ The functor: \[
+\left( {\overline{2}}^{\mathsf{op}} \circ {R}^{\mathsf{op}} \circ \overline{2} \circ R \right) : {\mathsf{DA}}_{\mathcal{L}} \rightarrow {\mathsf{mDA}}_{\mathcal{L}}
+\] minimizes deterministic automata. 
+\end{theorem}
 
 
 \texttt{[unsupported Typst element: context]}
@@ -718,5 +740,6 @@ Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a funct
 
 \texttt{[unsupported Typst element: context]}
 
-\texttt{[unsupported Typst element: bibliography]} 
+\printbibliography
+ 
 \end{document}

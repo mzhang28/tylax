@@ -21,7 +21,9 @@ pub enum LatexIr {
     Emph(Box<LatexIr>),
     Footnote(Box<LatexIr>),
     Reference(String),
+    Cite(Vec<String>),
     Figure { body: Box<LatexIr>, caption: Option<Box<LatexIr>> },
+    TheoremEnv { env: String, title: Option<Box<LatexIr>>, body: Box<LatexIr> },
     Table { cols: usize, rows: Vec<Vec<LatexIr>> },
     Unsupported(String),
 }
@@ -94,7 +96,7 @@ impl LatexIr {
                     format!("\\url{{{}}}", url)
                 }
             }
-            Self::SmartQuote(_) => "\"".to_string(),
+            Self::SmartQuote(double) => if *double { "\"".to_string() } else { "'".to_string() },
             Self::Space => " ".to_string(),
             Self::Text(text) => escape_text(text),
             Self::Latex(latex) => latex.clone(),
@@ -113,6 +115,14 @@ impl LatexIr {
             Self::Emph(content) => format!("\\emph{{{}}}", content.render()),
             Self::Footnote(content) => format!("\\footnote{{{}}}", content.render()),
             Self::Reference(label) => format!("\\ref{{{}}}", label),
+            Self::Cite(keys) => format!("\\cite{{{}}}", keys.join(",")),
+            Self::TheoremEnv { env, title, body } => {
+                let opt = title
+                    .as_ref()
+                    .map(|t| format!("[{}]", t.render()))
+                    .unwrap_or_default();
+                format!("\\begin{{{env}}}{opt}\n{}\n\\end{{{env}}}\n", body.render())
+            }
             Self::Figure { body, caption } => {
                 let cap = caption
                     .as_ref()

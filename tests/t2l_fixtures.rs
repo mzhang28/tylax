@@ -86,6 +86,11 @@ fn algebra_converts_and_snapshots() {
         let dir = scratch_dir();
         let tex_path = dir.path().join("main.tex");
         std::fs::write(&tex_path, &tex).unwrap();
+        // The bibliography needs its `.bib` alongside the `.tex`.
+        let bib = fixtures_dir().join("algebra/zotero.bib");
+        if bib.exists() {
+            let _ = std::fs::copy(&bib, dir.path().join("zotero.bib"));
+        }
         let status = Command::new("tectonic")
             .arg("--outdir").arg(dir.path())
             .arg(&tex_path)

@@ -1,23 +1,21 @@
 # Tylax Typst→LaTeX — support roadmap for `algebra.typ`
 
 `tests/fixtures/algebra/main.typ` (a course-notes chapter) is the primary
-extraction target. It evaluates and converts today (in `--unsupported=raw`),
-but **146 constructs** hit the unsupported path. This document records what
-each is and the change needed to support it.
+extraction target. It evaluates, converts, and compiles under tectonic. The
+unsupported count is down from **146 → 31** (items 1–4 + page geometry done);
+the remainder is diagrams and proof/`context`.
 
-## Current unsupported inventory
+## Remaining unsupported inventory (31)
 
 | Count | Construct | Origin | What it is |
 |------:|-----------|--------|------------|
-| 73 | `metadata` | theorion | theorem-counter markers |
-| 49 | `context` | theorion | theorem numbering / title display |
-| 10 | `context` | fletcher | commutative diagrams |
-| 7  | `math.raw` | user | `` `code` `` inside `$…$` |
-| 2  | `math.overline` | user | `overline(…)` in math |
+| 17 | `context` | fletcher | commutative diagrams (item 5) |
+| 12 | `context` | theorion | `#proof[…]` (`context` for QED/noanswer) |
 | 2  | `context` | user (`main.typ:67`) | `if target() != "html"` branch |
-| 1  | `footnote` | user | `#footnote[…]` |
-| 1  | `bibliography` | user | `#bibliography("zotero.bib")` |
-| 1  | `state-update` | wordometer | invisible word-count state |
+
+Done this cycle: math raw/overline/decorations (1), footnote + state-update (2),
+theorion theorem environments (3), citations/cross-refs/bibliography/labels (4),
+and page geometry (`#set page(width/height)`).
 
 ## Root cause: unresolved `context`
 
@@ -51,24 +49,24 @@ provide. Three strategies apply, chosen per feature:
 - Drop `typst::introspection::StateUpdateElem` silently (invisible counter
   mutation), not flagged unsupported.
 
-### 3. Theorem environments (theorion) — biggest win, 122/146
-`algebra` uses `#definition`(24), `#proof`(13), `#theorem`(8), `#exercise`(8),
-`#lemma`(4), `#remark`, `#example`. Recommended: a **theorion adapter shim**
-modelled on `packages/curryst.typ`, covering the imported entry points
-(`theorion:*`, `cosmos.rainbow:*`, `show-theorion`, and the 7 constructors),
-each emitting `metadata((kind, title, body))`. `lower.rs` maps these to
-`\begin{theorem}[title]…\end{theorem}` with `amsthm` + `\newtheorem` decls in
-the preamble. Generalize the `World::source` shim table (currently keyed on
-`spec.name == "curryst"`).
+### 3. Theorem environments (theorion) → amsthm  ✅ DONE
+Instead of a shim: theorion's `make-frame` environments evaluate to a
+`figure(kind: …)` whose body carries a `<theorion-frame-metadata>` dict with
+`kind`/`title`/`body`. `lower.rs` detects that dict, emits `LatexIr::TheoremEnv`
+→ `\begin{kind}[title]…\end{kind}`, and skips the context-heavy rendered box.
+`amsthm` + `\newtheorem` decls added to the preamble. (`#proof` is separate — a
+bare `context`, still unsupported; `#exercise`/`#example` already lower as plain
+`emph`+body.)
 
-### 4. Citations, cross-references, bibliography
-`algebra` mixes `@key` **citations** (→ `zotero.bib`) with `@key`
-**cross-refs** (→ `<label>`s). Today all `RefElem`s become `\ref{}` and **no
-`\label{}` is ever emitted**, so nothing resolves. Needed:
-- `CiteElem`/`CiteGroup` → `\cite{key}`; distinguish cite vs ref by whether the
-  target resolves to a bib entry.
-- Emit `\label{…}` from `elem.label()` on headings / equations / theorems.
-- `BibliographyElem` → `biblatex` + `\printbibliography`; copy the `.bib`.
+### 4. Citations, cross-references, bibliography  ✅ DONE
+- Pre-pass collects all document labels; `RefElem` → `\ref` if the target is a
+  defined label, else `\cite`. `CiteElem`/`CiteGroup` → `\cite{keys}`.
+- A `\label{…}` is emitted after any labelled element (wrapper in
+  `lower_content`).
+- `BibliographyElem` → `\printbibliography`; preamble gets
+  `\usepackage[backend=bibtex]{biblatex}` + `\addbibresource{…}` (bibtex, not
+  biber: tectonic has a built-in bibtex engine). The `.bib` must sit alongside
+  the generated `.tex`.
 
 ### 5. Diagrams (fletcher + cetz) — implement `--unsupported=image`
 ~30 diagram sites. Finish the plan's image mode: render the diagram subtree via
@@ -76,9 +74,11 @@ the preamble. Generalize the `World::source` shim table (currently keyed on
 for context-bound subtrees.
 
 ## Cross-cutting gaps
-- **`\label` emission** missing entirely (blocks `\ref`/`\cite`).
 - **Numbered equations**: `#set math.equation(numbering:"(1)")` — currently
   unnumbered `\[…\]`; should use `equation`/`align` for numbered, referenceable
-  math.
-- **Page geometry**: `extract.rs` reads margin/numbering but not
-  `#set page(width/height)`.
+  math. (Cross-refs to equations therefore resolve only approximately.)
+- ~~`\label` emission~~ — done (item 4).
+- ~~Page geometry~~ — done: `extract::get_page_size` reads
+  `#set page(width/height)` → `geometry` `paperwidth`/`paperheight`. (The bug
+  was that `PageElem::width`'s default is `Smart::Custom(A4)`, so a plain
+  `chain.get` returned A4; fixed by checking `chain.has(...)` first.)

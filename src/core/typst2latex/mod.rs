@@ -140,6 +140,17 @@ pub fn convert(
     // bodies with `RealizationKind::Math` (after applying matching
     // equation-level user recipes such as quick-maths `shorthands`). This
     // keeps document structure intact while still honoring show/set rules.
+    // Pre-pass: collect every label defined in the document so lowering can
+    // distinguish a cross-reference (`@key` → defined label) from a citation
+    // (`@key` → bibliography entry).
+    let mut defined_labels = std::collections::HashSet::new();
+    let _ = content.traverse(&mut |el: typst::foundations::Content| -> std::ops::ControlFlow<()> {
+        if let Some(label) = el.label() {
+            defined_labels.insert(label.resolve().to_string());
+        }
+        std::ops::ControlFlow::Continue(())
+    });
+
     let mut ctx = lower::LowerContext {
         world: world_dyn,
         engine,
@@ -147,6 +158,8 @@ pub fn convert(
         arenas: &arenas,
         styles,
         unsupported: Vec::new(),
+        defined_labels,
+        bib_resources: Vec::new(),
     };
 
     let latex_ir = ir::LatexIr::Document(vec![lower::lower_content(&content, styles, &mut ctx)]);
@@ -189,6 +202,24 @@ pub fn convert(
         "\\usepackage{mathtools}\n",
         "\\usepackage{stmaryrd}\n",
         "\\usepackage{mathpartir}\n",
+        "\\usepackage{amsthm}\n",
+        // Theorem environments (theorion's make-frame identifiers). `plain`
+        // style for theorem-like, `definition` (upright) for the rest.
+        "\\theoremstyle{plain}\n",
+        "\\newtheorem{theorem}{Theorem}\n",
+        "\\newtheorem{lemma}{Lemma}\n",
+        "\\newtheorem{corollary}{Corollary}\n",
+        "\\newtheorem{proposition}{Proposition}\n",
+        "\\newtheorem{conjecture}{Conjecture}\n",
+        "\\theoremstyle{definition}\n",
+        "\\newtheorem{definition}{Definition}\n",
+        "\\newtheorem{example}{Example}\n",
+        "\\newtheorem{remark}{Remark}\n",
+        "\\newtheorem{axiom}{Axiom}\n",
+        "\\newtheorem{postulate}{Postulate}\n",
+        "\\newtheorem{assumption}{Assumption}\n",
+        "\\newtheorem{property}{Property}\n",
+        "\\newtheorem{exercise}{Exercise}\n",
         "\\usepackage{titlesec}\n",
         "\\newfontfamily\\headingfont{Libertinus Sans}\n",
         "\\titleformat*{\\section}{\\Large\\bfseries\\headingfont}\n",
@@ -197,24 +228,41 @@ pub fn convert(
         "\\usepackage{hyperref}\n",
     ).to_string();
 
+    // Page geometry: paper size (`#set page(width/height)`) and a uniform
+    // margin, folded into a single `geometry` package call.
+    let mut geometry_opts: Vec<String> = Vec::new();
+    let (page_w, page_h) = extract::get_page_size(&content);
+    if let Some(w) = page_w {
+        geometry_opts.push(format!("paperwidth={w}pt"));
+    }
+    if let Some(h) = page_h {
+        geometry_opts.push(format!("paperheight={h}pt"));
+    }
     if let Some(sides) = extract::get_page_margin(&content) {
-        // If it's splat and has a length, we can just use `margin=...pt`
+        // Uniform margin (all four sides equal and concrete) → `margin=..pt`.
         if sides.left == sides.right && sides.top == sides.bottom && sides.left == sides.top {
             if let Some(typst::foundations::Smart::Custom(rel)) = sides.left {
-                let pt_str = format!("{:?}", rel.abs);
-                if pt_str.ends_with("pt") {
-                    let pt: f64 = pt_str.trim_end_matches("pt").parse().unwrap_or(0.0);
-                    preamble.push_str(&format!("\\usepackage[margin={pt}pt]{{geometry}}\n"));
-                } else {
-                    preamble.push_str(&format!("\\usepackage[margin={pt_str}]{{geometry}}\n"));
-                }
+                geometry_opts.push(format!("margin={}pt", rel.abs.abs.to_pt()));
             }
         }
+    }
+    if !geometry_opts.is_empty() {
+        preamble.push_str(&format!("\\usepackage[{}]{{geometry}}\n", geometry_opts.join(",")));
     }
 
     if let Some(num) = extract::get_page_numbering(&content) {
         if num.contains("Arabic") {
             preamble.push_str("\\pagenumbering{arabic}\n");
+        }
+    }
+
+    // Bibliography. Use biblatex's `bibtex` backend: tectonic has a built-in
+    // bibtex engine (biber would be an external binary). The `.bib` file(s)
+    // must sit alongside the generated `.tex` to compile.
+    if !ctx.bib_resources.is_empty() {
+        preamble.push_str("\\usepackage[backend=bibtex]{biblatex}\n");
+        for res in &ctx.bib_resources {
+            preamble.push_str(&format!("\\addbibresource{{{res}}}\n"));
         }
     }
 

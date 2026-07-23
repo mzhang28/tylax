@@ -1,8 +1,11 @@
 use typst::math::EquationElem;
 use typst::foundations::{Content, SequenceElem, StyledElem, StyleChain};
 use typst::text::{TextElem, SpaceElem, RawElem, SmartQuoteElem};
-use typst::model::{HeadingElem, ListItem, EnumItem, TermItem, LinkElem, ParbreakElem, StrongElem, EmphElem, RefElem, FigureElem, TableElem, TableChild, TableItem, FootnoteElem, FootnoteBody};
+use typst::model::{HeadingElem, ListItem, EnumItem, TermItem, LinkElem, ParbreakElem, StrongElem, EmphElem, RefElem, FigureElem, TableElem, TableChild, TableItem, FootnoteElem, FootnoteBody, CiteElem, CiteGroup, BibliographyElem};
 use typst::introspection::StateUpdateElem;
+use typst::loading::DataSource;
+use typst::foundations::PathOrStr;
+use std::collections::HashSet;
 use typst::layout::{BlockElem, BoxElem, HElem, StackElem, StackChild, AlignElem};
 use typst::visualize::RectElem;
 use typst::foundations::SymbolElem;
@@ -21,6 +24,12 @@ pub struct LowerContext<'a> {
     /// human-readable source location + originating package). `convert`
     /// enforces the configured [`UnsupportedMode`] against this list.
     pub unsupported: Vec<UnsupportedInfo>,
+    /// All labels defined in the document (`<label>`), collected in a pre-pass.
+    /// Used to tell a cross-reference (`@key` → a defined label → `\ref`) from
+    /// a citation (`@key` → a bibliography entry → `\cite`).
+    pub defined_labels: HashSet<String>,
+    /// `.bib` resources referenced by `#bibliography(...)`, for `\addbibresource`.
+    pub bib_resources: Vec<String>,
 }
 
 /// A Typst construct Tylax could not faithfully lower, with provenance.
@@ -70,7 +79,19 @@ impl<'a> LowerContext<'a> {
 /// styles off `StyleChain::default()` instead would silently ignore every
 /// `#set`/`#show`-driven style (heading numbering level, equation `block`
 /// flag, raw-block `lang`, smart-quote style, ...).
+///
+/// This wrapper also emits a `\label{…}` after any element that carries a
+/// Typst label (`<name>`), so cross-references resolve.
 pub fn lower_content<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut LowerContext) -> LatexIr {
+    let ir = lower_content_inner(content, styles, ctx);
+    if let Some(label) = content.label() {
+        let key = label.resolve().to_string();
+        return LatexIr::Sequence(vec![ir, LatexIr::Latex(format!("\\label{{{key}}}"))]);
+    }
+    ir
+}
+
+fn lower_content_inner<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut LowerContext) -> LatexIr {
     if let Some(seq) = content.to_packed::<SequenceElem>() {
         let mut children = Vec::new();
         let mut current_list: Vec<LatexIr> = Vec::new();
@@ -256,11 +277,52 @@ pub fn lower_content<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut Lo
     }
 
     if let Some(reference) = content.to_packed::<RefElem>() {
-        // Emit `\ref{<label>}`; the label resolves to its string id.
-        return LatexIr::Reference(reference.target.resolve().to_string());
+        // `@key` is a cross-reference if `key` is a label defined in the
+        // document, otherwise a citation into the bibliography.
+        let key = reference.target.resolve().to_string();
+        return if ctx.defined_labels.contains(&key) {
+            LatexIr::Reference(key)
+        } else {
+            LatexIr::Cite(vec![key])
+        };
+    }
+
+    if let Some(cite) = content.to_packed::<CiteElem>() {
+        return LatexIr::Cite(vec![cite.key.resolve().to_string()]);
+    }
+
+    if let Some(group) = content.to_packed::<CiteGroup>() {
+        let keys = group
+            .children
+            .iter()
+            .filter_map(|c| c.to_packed::<CiteElem>().map(|e| e.key.resolve().to_string()))
+            .collect();
+        return LatexIr::Cite(keys);
+    }
+
+    if let Some(bib) = content.to_packed::<BibliographyElem>() {
+        for ds in &bib.sources.source.0 {
+            if let DataSource::Path(p) = ds {
+                let name = match p {
+                    PathOrStr::Path(rp) => rp.vpath().get_without_slash().to_string(),
+                    PathOrStr::Str(s) => s.as_str().to_string(),
+                };
+                if !ctx.bib_resources.contains(&name) {
+                    ctx.bib_resources.push(name);
+                }
+            }
+        }
+        return LatexIr::Latex("\\printbibliography\n".to_string());
     }
 
     if let Some(figure) = content.to_packed::<FigureElem>() {
+        // theorion theorem environments evaluate to a `figure` whose body
+        // carries a `<theorion-frame-metadata>` dict with the clean kind/
+        // title/body. Recover those and emit an amsthm environment, skipping
+        // the context-heavy rendered box that would otherwise be lowered.
+        if let Some(env) = lower_theorion_frame(&figure.body, styles, ctx) {
+            return env;
+        }
         let body = Box::new(lower_content(&figure.body, styles, ctx));
         let caption = figure
             .caption
@@ -281,6 +343,57 @@ pub fn lower_content<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut Lo
     }
 
     ctx.record_unsupported(content.elem().name(), content.span())
+}
+
+/// theorion theorem environments (`#theorem`, `#lemma`, `#definition`, ... —
+/// anything built via theorion's `make-frame`) evaluate to a `figure` whose
+/// body contains a `metadata((identifier, kind, title, body, ...))` dict tagged
+/// `<theorion-frame-metadata>`. If `content` contains such a dict, emit the
+/// corresponding amsthm environment from the clean `kind`/`title`/`body`.
+fn lower_theorion_frame(content: &Content, styles: StyleChain, ctx: &mut LowerContext) -> Option<LatexIr> {
+    let dict = find_theorion_frame(content)?;
+    let kind = match dict.get(&typst::foundations::Str::from("kind")).ok()? {
+        Value::Str(s) => s.as_str().to_string(),
+        _ => return None,
+    };
+    let body = match dict.get(&typst::foundations::Str::from("body")).ok()? {
+        Value::Content(c) => c.clone(),
+        _ => return None,
+    };
+    // `title` is empty (Str "") when the environment was used without a title,
+    // or arbitrary content otherwise.
+    let title = match dict.get(&typst::foundations::Str::from("title")).ok() {
+        Some(Value::Content(c)) => Some(Box::new(lower_content(c, styles, ctx))),
+        Some(Value::Str(s)) if !s.is_empty() => Some(Box::new(LatexIr::Text(s.as_str().to_string()))),
+        _ => None,
+    };
+    Some(LatexIr::TheoremEnv {
+        env: kind,
+        title,
+        body: Box::new(lower_content(&body, styles, ctx)),
+    })
+}
+
+/// Recursively search `content` for a theorion frame metadata dict (a metadata
+/// element whose dict has `identifier` + `kind` + `body`). Only descends
+/// through sequences/styled wrappers — it does not walk into dict values.
+fn find_theorion_frame<'a>(content: &'a Content) -> Option<&'a typst::foundations::Dict> {
+    if let Some(md) = content.to_packed::<MetadataElem>() {
+        if let Value::Dict(dict) = &md.value {
+            let has = |k| dict.get(&typst::foundations::Str::from(k)).is_ok();
+            if has("identifier") && has("kind") && has("body") {
+                return Some(dict);
+            }
+        }
+        return None;
+    }
+    if let Some(seq) = content.to_packed::<SequenceElem>() {
+        return seq.children.iter().find_map(find_theorion_frame);
+    }
+    if let Some(styled) = content.to_packed::<StyledElem>() {
+        return find_theorion_frame(&styled.child);
+    }
+    None
 }
 
 /// Lower a Typst `table(...)` into a simple LaTeX `tabular`. Handles the
