@@ -2,7 +2,7 @@
 pub enum LatexIr {
     Document(Vec<LatexIr>),
     Sequence(Vec<LatexIr>),
-    Heading { level: usize, content: Box<LatexIr> },
+    Heading { level: usize, numbered: bool, content: Box<LatexIr> },
     Item(Box<LatexIr>),
     List(Vec<LatexIr>),
     NumberedList(Vec<LatexIr>),
@@ -62,7 +62,7 @@ impl LatexIr {
             Self::Document(children) | Self::Sequence(children) => {
                 children.iter().map(|c| c.render()).collect::<Vec<_>>().join("")
             }
-            Self::Heading { level, content } => {
+            Self::Heading { level, numbered, content } => {
                 let cmd = match level {
                     1 => "section",
                     2 => "subsection",
@@ -70,7 +70,8 @@ impl LatexIr {
                     4 => "paragraph",
                     _ => "subparagraph",
                 };
-                format!("\\{cmd}{{{}}}\n", content.render())
+                let star = if *numbered { "" } else { "*" };
+                format!("\\{cmd}{star}{{{}}}\n", content.render())
             }
             Self::Item(content) => {
                 format!("\\item {}\n", content.render())

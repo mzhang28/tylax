@@ -407,6 +407,10 @@ fn push_glyph(ch: char, styles: StyleChain, out: &mut String) {
         '\u{2062}' => return,            // invisible times
         '\u{2061}' => return,            // function application
         '\u{FE0E}' | '\u{FE0F}' => return, // variation selectors
+        // Literal brace *characters* (Typst math braces are literal, not
+        // grouping): escape so they don't act as LaTeX groups.
+        '{' => "\\{".to_string(),
+        '}' => "\\}".to_string(),
         _ => {
             if let Some(latex) = UNICODE_TO_LATEX.get(&ch) {
                 format!("{latex} ")

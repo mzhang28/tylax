@@ -165,7 +165,10 @@ fn lower_content_inner<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut 
         // full realization); resolve it the same way Typst does, from
         // `offset + depth`, so `=`/`==`/`===` map to the right sectioning level.
         let level = heading.resolve_level(styles).get();
-        return LatexIr::Heading { level, content: Box::new(lower_content(&heading.body, styles, ctx)) };
+        // Headings with `numbering: none` (e.g. the title block) use the
+        // starred form so they don't consume a section number.
+        let numbered = heading.numbering.get_ref(styles).is_some();
+        return LatexIr::Heading { level, numbered, content: Box::new(lower_content(&heading.body, styles, ctx)) };
     }
 
     if let Some(item) = content.to_packed::<ListItem>() {
@@ -260,6 +263,29 @@ fn lower_content_inner<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut 
         return LatexIr::Sequence(vec![]);
     }
 
+    // Introspection tags carry no visible output.
+    if content.is::<typst::introspection::TagElem>() {
+        return LatexIr::Sequence(vec![]);
+    }
+
+    // Realizing a `context` groups its content into paragraphs; lower the
+    // paragraph body and separate paragraphs with a break.
+    if let Some(par) = content.to_packed::<typst::model::ParElem>() {
+        return LatexIr::Sequence(vec![lower_content(&par.body, styles, ctx), LatexIr::Parbreak]);
+    }
+
+    // Vertical spacing → a paragraph break.
+    if content.is::<typst::layout::VElem>() {
+        return LatexIr::Parbreak;
+    }
+
+    // A `context` expression (e.g. the document title block, or theorion's
+    // `#proof`): resolve it by realizing (which assigns a location and fires
+    // the built-in context show rule), then lower the produced content.
+    if content.is::<typst::foundations::ContextElem>() {
+        return resolve_context(content, styles, ctx);
+    }
+
     if let Some(footnote) = content.to_packed::<FootnoteElem>() {
         return match &footnote.body {
             FootnoteBody::Content(c) => LatexIr::Footnote(Box::new(lower_content(c, styles, ctx))),
@@ -335,6 +361,15 @@ fn lower_content_inner<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut 
         return lower_table(table, styles, ctx);
     }
 
+    if content.is::<typst::model::OutlineElem>() {
+        return LatexIr::Latex("\\tableofcontents\n".to_string());
+    }
+
+    // Images (e.g. theorion's small decorative icons) are dropped for now.
+    if content.is::<typst::visualize::ImageElem>() {
+        return LatexIr::Sequence(vec![]);
+    }
+
     if let Some(metadata) = content.to_packed::<MetadataElem>() {
         if let Some(ir) = lower_curryst_metadata(metadata, styles, ctx) {
             return ir;
@@ -351,6 +386,30 @@ fn lower_content_inner<'s>(content: &Content, styles: StyleChain<'s>, ctx: &mut 
     }
 
     ctx.record_unsupported(content.elem().name(), content.span())
+}
+
+/// Resolve a `context` expression by running its closure and lowering the
+/// produced content.
+///
+/// We call the built-in `CONTEXT_RULE` directly (after assigning the element a
+/// location) rather than realizing the context. `CONTEXT_RULE` just invokes the
+/// closure and returns its raw result, so nested equations stay as
+/// `EquationElem` — realizing instead would re-visit the result and turn every
+/// inline equation into an opaque `InlineElem` (and wrap prose in paragraphs).
+/// `here()`/`target()`/state queries resolve against the (empty) introspector,
+/// which yields the defaults we want (e.g. non-HTML target, non-"noanswer").
+fn resolve_context(content: &Content, styles: StyleChain, ctx: &mut LowerContext) -> LatexIr {
+    let mut elem = content.clone();
+    let key = typst::utils::hash128(&elem);
+    let loc = ctx.locator.next_location(&mut ctx.engine, key, content.span());
+    elem.set_location(loc);
+    let Some(packed) = elem.to_packed::<typst::foundations::ContextElem>() else {
+        return ctx.record_unsupported("context", content.span());
+    };
+    match (typst::foundations::CONTEXT_RULE)(packed, &mut ctx.engine, styles) {
+        Ok(result) => lower_content(&result, styles, ctx),
+        Err(_) => ctx.record_unsupported("context", content.span()),
+    }
 }
 
 /// theorion theorem environments (`#theorem`, `#lemma`, `#definition`, ... —

@@ -1,24 +1,23 @@
 # Tylax Typst→LaTeX — support roadmap for `algebra.typ`
 
 `tests/fixtures/algebra/main.typ` (a course-notes chapter) is the primary
-extraction target. It evaluates, converts, and compiles under tectonic. The
-unsupported count is down from **146 → 14** (items 1–5 + page geometry done);
-the remainder is `#proof` and one user `context`.
+extraction target. It evaluates, converts, and compiles cleanly under tectonic
+with **0 unsupported constructs** (down from 146). All headings, lists, math,
+theorems, proofs, citations/bibliography, and commutative diagrams render.
 
-## Remaining unsupported inventory (14)
+## Status: complete for algebra
 
-| Count | Construct | Origin | What it is |
-|------:|-----------|--------|------------|
-| 12 | `context` | theorion | `#proof[…]` (`context` for QED/noanswer) |
-| 2  | `context` | user (`main.typ:67`) | `if target() != "html"` branch |
+Everything in the inventory has been handled. Done across cycles: math
+raw/overline/decorations, footnote, theorion theorem environments → amsthm,
+citations/cross-refs/bibliography/labels, fletcher diagrams → tikz-cd, page
+geometry, and — most recently — **`context` evaluation**, which resolved the
+document title block and all `#proof` bodies (see "context" below).
 
-Both are `context` expressions — resolving them needs context evaluation
-(invoke the `ContextElem` func in a minimal engine context), which is the next
-frontier. `#proof` would then map to amsthm's `proof` environment.
-
-Done this cycle: math raw/overline/decorations (1), footnote + state-update (2),
-theorion theorem environments (3), citations/cross-refs/bibliography/labels (4),
-fletcher diagrams → tikz-cd (5), and page geometry (`#set page(width/height)`).
+Remaining rough edges (cosmetic, not unsupported):
+- The two *automaton* (state-machine) diagrams degrade to sparse tikz-cd
+  (self-loops/bends don't map); the commutative diagrams are faithful.
+- Theorems render as plain amsthm boxes vs theorion's colored boxes.
+- Decorative theorion icons (`image`) are dropped.
 
 ## Root cause: unresolved `context`
 
@@ -94,6 +93,18 @@ behaviour, so a marker-shim breaks its layout).
 ~30 diagram sites. Finish the plan's image mode: render the diagram subtree via
 `typst` to SVG/PDF and emit `\includegraphics`. Doubles as the general fallback
 for context-bound subtrees.
+
+### 6. `context` evaluation  ✅ DONE
+`ContextElem` is resolved by calling the public `CONTEXT_RULE` directly (after
+assigning the element a location via the locator) instead of realizing it.
+`CONTEXT_RULE` just runs the closure and returns its raw result, so nested
+equations stay as `EquationElem` (realizing would turn them into opaque
+`InlineElem` and wrap prose in paragraphs). `here()`/`target()`/state queries
+resolve against the empty introspector, giving the defaults we want (non-HTML
+target, non-"noanswer"). This restored the document title block and every
+`#proof` body. Also added: `#outline` → `\tableofcontents`, unnumbered headings
+(`numbering: none`) → `\section*`, literal math braces `{}` → `\{`/`\}`, and
+bare (un-`\[…\]`-wrapped) tikz-cd so diagrams survive inside table cells.
 
 ## Cross-cutting gaps
 - **Numbered equations**: `#set math.equation(numbering:"(1)")` — currently
