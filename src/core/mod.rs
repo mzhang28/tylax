@@ -16,5 +16,5 @@ pub use latex2typst::{
 
 // Re-export main types and functions from typst2latex
 pub use typst2latex::{
-    typst_document_to_latex, typst_to_latex, typst_to_latex_with_options, T2LOptions,
+     T2LOptions,
 };

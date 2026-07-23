@@ -8,7 +8,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::{
-    latex_document_to_typst_with_options, latex_to_typst_with_options, typst_to_latex_with_options,
+    latex_document_to_typst_with_options, latex_to_typst_with_options, 
     L2TOptions, T2LOptions,
 };
 
@@ -404,7 +404,14 @@ fn convert_one(plan: &PlannedFile, options: &BatchOptions) -> io::Result<()> {
         BatchDirection::TypstToLatex => {
             let mut t2l_options = options.t2l_options.clone();
             t2l_options.full_document = options.full_document;
-            typst_to_latex_with_options(&content, &t2l_options)
+            let project_root = plan
+                .input_path
+                .parent()
+                .filter(|p| !p.as_os_str().is_empty())
+                .unwrap_or(&options.input);
+            crate::core::typst2latex::convert(&plan.input_path, project_root, &t2l_options)
+                .map_err(|e| io::Error::other(e.to_string()))?
+                .output
         }
         BatchDirection::Auto => unreachable!("auto direction must be resolved before conversion"),
     };

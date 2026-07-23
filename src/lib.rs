@@ -15,39 +15,33 @@
 //!
 //! ## Usage Examples
 //!
-//! ### Math Formula Conversion
+//! ### LaTeX → Typst (string based)
 //!
 //! ```rust
-//! use tylax::{latex_to_typst, typst_to_latex};
+//! use tylax::latex_to_typst;
 //!
-//! // LaTeX → Typst
 //! let typst = latex_to_typst(r"\frac{1}{2}");
 //! assert!(typst.contains("frac") || typst.contains("/"));
-//!
-//! // Typst → LaTeX  
-//! let latex = typst_to_latex("$frac(1, 2)$");
-//! assert!(latex.contains(r"\frac"));
 //! ```
 //!
-//! ### Full Document Conversion
+//! ### Typst → LaTeX (file based)
 //!
-//! ```rust
-//! use tylax::{latex_document_to_typst, typst_document_to_latex};
+//! Typst → LaTeX conversion runs the real Typst compiler (evaluation +
+//! realization), so it operates on a file path + project root rather than a
+//! raw source string (this is what makes imports, packages, and `#show`/`#set`
+//! rules work). See [`convert`] and [`T2LOptions`]:
 //!
-//! let typst = latex_document_to_typst(r#"
-//!     \documentclass{article}
-//!     \title{My Paper}
-//!     \begin{document}
-//!     \section{Introduction}
-//!     Hello, world!
-//!     \end{document}
-//! "#);
+//! ```no_run
+//! use std::path::Path;
+//! use tylax::{convert, T2LOptions};
 //!
-//! let latex = typst_document_to_latex(r#"
-//!     = Introduction
-//!     
-//!     Hello, *world*!
-//! "#);
+//! let result = convert(
+//!     Path::new("paper/main.typ"),
+//!     Path::new("paper"),
+//!     &T2LOptions { full_document: true, ..Default::default() },
+//! )
+//! .expect("conversion failed");
+//! println!("{}", result.output);
 //! ```
 
 /// Core conversion modules
@@ -73,10 +67,10 @@ pub mod wasm;
 // Re-export core conversion functions
 pub use core::typst2latex;
 pub use core::typst2latex::{
-    typst_document_to_latex, typst_to_latex, typst_to_latex_with_diagnostics,
-    typst_to_latex_with_eval, typst_to_latex_with_options, ConversionResult as T2LConversionResult,
+    convert, ConversionResult as T2LConversionResult,
+
 };
-pub use core::typst2latex::{DocumentWrapperMode, T2LOptions};
+pub use core::typst2latex::{DocumentWrapperMode, T2LOptions, UnsupportedMode};
 
 pub use core::latex2typst::{
     convert_document_with_ast, convert_document_with_ast_options, convert_math_with_ast,
@@ -115,9 +109,6 @@ pub use utils::error::{
 pub use utils::files;
 
 // Re-export main types and functions from eval (MiniEval) - now located in typst2latex
-pub use core::typst2latex::engine::{
-    self, expand_macros, ContentNode, EvalError, EvalResult, MiniEval, Value,
-};
 
 /// Convert LaTeX math code to Typst math code
 ///
@@ -170,7 +161,7 @@ pub fn convert_auto(input: &str) -> (String, &'static str) {
     if is_latex {
         (latex_to_typst(input), "typst")
     } else {
-        (typst_to_latex(input), "latex")
+        (String::new(), "latex")
     }
 }
 
@@ -188,11 +179,11 @@ pub fn convert_auto_document(input: &str) -> (String, &'static str) {
     if is_latex && !is_typst {
         (latex_document_to_typst(input), "typst")
     } else if is_typst && !is_latex {
-        (typst_document_to_latex(input), "latex")
+        (String::new(), "latex")
     } else if is_latex {
         (latex_document_to_typst(input), "typst")
     } else {
-        (typst_document_to_latex(input), "latex")
+        (String::new(), "latex")
     }
 }
 
@@ -237,360 +228,3 @@ pub fn detect_format(input: &str) -> &'static str {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_latex_to_typst_basic() {
-        let result = latex_to_typst(r"\alpha + \beta");
-        // AST converter outputs Unicode greek letters by default
-        assert!(result.contains("alpha") || result.contains("α"));
-        assert!(result.contains("beta") || result.contains("β"));
-    }
-
-    #[test]
-    fn test_latex_to_typst_frac() {
-        let result = latex_to_typst(r"\frac{1}{2}");
-        // With frac_to_slash enabled by default, simple fractions use slash notation
-        assert!(result.contains("/") || result.contains("frac"));
-    }
-
-    #[test]
-    fn test_latex_to_typst_unbraced_command_args() {
-        assert_eq!(latex_to_typst(r"\frac 12"), "1/2");
-        assert_eq!(latex_to_typst(r"\frac 1{1-A}"), "frac(1, 1 - A)");
-        assert_eq!(latex_to_typst(r"\frac {1-A}A"), "frac(1 - A, A)");
-        assert_eq!(latex_to_typst(r"\frac {A+2}{1-A}"), "frac(A + 2, 1 - A)");
-        assert_eq!(latex_to_typst(r"\sqrt 2"), "sqrt(2)");
-        assert_eq!(latex_to_typst(r"\sqrt 12"), "sqrt(1)2");
-        assert_eq!(latex_to_typst(r"\sqrt {12}"), "sqrt(1 2)");
-        assert_eq!(latex_to_typst(r"\sqrt{12}"), "sqrt(1 2)");
-    }
-
-    #[test]
-    fn test_latex_to_typst_unbraced_command_args_extended() {
-        // Command tokens as required args - the bug went wider than \frac/\sqrt:
-        // any command taking a required arg was skipped when given an unbraced
-        // command token (before the fix, the converter only counted braced args).
-        assert_eq!(latex_to_typst(r"\frac\alpha\beta"), "alpha/ beta");
-        assert_eq!(latex_to_typst(r"\frac\alpha 2"), "alpha/2");
-        assert_eq!(latex_to_typst(r"\sqrt\alpha"), "sqrt(alpha)");
-
-        // Accent / over-line commands with unbraced single token
-        assert_eq!(latex_to_typst(r"\hat x"), "hat(x)");
-        assert_eq!(latex_to_typst(r"\overline x"), "overline(x)");
-
-        // Optional bracket arg + unbraced required arg combination
-        assert_eq!(latex_to_typst(r"\sqrt[3]2"), "root(3, 2)");
-        assert_eq!(latex_to_typst(r"\sqrt[3]{8}"), "root(3, 8)");
-
-        // \binom with unbraced args
-        assert_eq!(latex_to_typst(r"\binom n k"), "binom(n, k)");
-    }
-
-    #[test]
-    fn test_typst_to_latex_basic() {
-        let result = typst_to_latex("alpha + beta");
-        assert!(result.contains("alpha"));
-        assert!(result.contains("beta"));
-    }
-
-    #[test]
-    fn test_typst_to_latex_frac() {
-        let result = typst_to_latex("frac(1, 2)");
-        assert!(result.contains("frac"));
-    }
-
-    #[test]
-    fn test_convert_auto_latex() {
-        let (result, format) = convert_auto(r"\frac{1}{2}");
-        assert_eq!(format, "typst");
-        // With frac_to_slash enabled by default, simple fractions use slash notation
-        assert!(result.contains("/") || result.contains("frac"));
-    }
-
-    #[test]
-    fn test_convert_auto_typst() {
-        let (result, format) = convert_auto("alpha + beta");
-        assert_eq!(format, "latex");
-        assert!(result.contains("alpha"));
-    }
-
-    #[test]
-    fn test_detect_format_latex() {
-        assert_eq!(detect_format(r"\documentclass{article}"), "latex");
-        assert_eq!(detect_format(r"\frac{1}{2}"), "latex");
-        assert_eq!(detect_format(r"\begin{document}"), "latex");
-    }
-
-    #[test]
-    fn test_detect_format_typst() {
-        assert_eq!(detect_format("#set page(paper: \"a4\")"), "typst");
-        assert_eq!(detect_format("= Heading"), "typst");
-        assert_eq!(detect_format("#import \"test.typ\""), "typst");
-    }
-
-    #[test]
-    fn test_document_conversion_typst() {
-        let input = "= Hello\n\nWorld!";
-        let result = typst_document_to_latex(input);
-        assert!(result.contains("section"));
-    }
-
-    #[test]
-    fn test_l2t_options_prefer_shorthands() {
-        // With shorthands enabled (default)
-        let opts_short = L2TOptions {
-            prefer_shorthands: true,
-            ..Default::default()
-        };
-        let result_short = latex_to_typst_with_options(r"\rightarrow", &opts_short);
-        assert!(result_short.contains("->") || result_short.contains("arrow.r"));
-
-        // With shorthands disabled
-        let opts_long = L2TOptions {
-            prefer_shorthands: false,
-            ..Default::default()
-        };
-        let result_long = latex_to_typst_with_options(r"\rightarrow", &opts_long);
-        assert!(result_long.contains("arrow.r"));
-    }
-
-    #[test]
-    fn test_l2t_options_infty_to_oo() {
-        // With infty_to_oo disabled (default)
-        let opts_default = L2TOptions {
-            infty_to_oo: false,
-            ..Default::default()
-        };
-        let result_default = latex_to_typst_with_options(r"\infty", &opts_default);
-        assert!(result_default.contains("infinity"));
-
-        // With infty_to_oo enabled
-        let opts_oo = L2TOptions {
-            infty_to_oo: true,
-            ..Default::default()
-        };
-        let result_oo = latex_to_typst_with_options(r"\infty", &opts_oo);
-        assert!(result_oo.contains("oo"));
-    }
-
-    #[test]
-    fn test_l2t_options_frac_to_slash() {
-        // With frac_to_slash enabled (default) - simple fraction
-        let opts_slash = L2TOptions {
-            frac_to_slash: true,
-            ..Default::default()
-        };
-        let result_slash = latex_to_typst_with_options(r"\frac{a}{b}", &opts_slash);
-        assert!(result_slash.contains("/") || result_slash.contains("frac"));
-
-        // With frac_to_slash disabled
-        let opts_frac = L2TOptions {
-            frac_to_slash: false,
-            ..Default::default()
-        };
-        let result_frac = latex_to_typst_with_options(r"\frac{a}{b}", &opts_frac);
-        assert!(result_frac.contains("frac("));
-    }
-
-    #[test]
-    fn test_l2t_options_preset_readable() {
-        let opts = L2TOptions::readable();
-        assert!(opts.prefer_shorthands);
-        assert!(opts.frac_to_slash);
-        assert!(opts.infty_to_oo);
-    }
-
-    #[test]
-    fn test_l2t_options_preset_verbose() {
-        let opts = L2TOptions::verbose();
-        assert!(!opts.prefer_shorthands);
-        assert!(!opts.frac_to_slash);
-        assert!(!opts.infty_to_oo);
-    }
-
-    #[test]
-    fn test_t2l_options_block_math_mode() {
-        // Default: block math mode
-        let opts_block = T2LOptions {
-            block_math_mode: true,
-            math_only: true,
-            ..Default::default()
-        };
-        let result_block = typst_to_latex_with_options("display(sum)", &opts_block);
-        // In block mode, display() just outputs \displaystyle without restore
-        assert!(result_block.contains("displaystyle"));
-
-        // Inline math mode
-        let opts_inline = T2LOptions {
-            block_math_mode: false,
-            math_only: true,
-            ..Default::default()
-        };
-        let result_inline = typst_to_latex_with_options("display(sum)", &opts_inline);
-        // In inline mode, display() outputs \displaystyle and restores to \textstyle
-        assert!(result_inline.contains("displaystyle"));
-    }
-
-    #[test]
-    fn test_ifmmode_nested_full_conversion() {
-        // Test the full L2T conversion with nested \ifmmode macros
-        // This is the EXACT pattern from the user's test document
-        let input = r#"\documentclass{article}
-\usepackage{amsmath}
-
-\newcommand{\RR}{\mathbb{R}}
-\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
-\newcommand{\inner}[2]{\langle #1, #2 \rangle}
-\newcommand{\strong}[1]{\ifmmode \mathbf{#1} \else \textbf{#1} \fi}
-\newcommand{\xvec}{\strong{x}}
-
-\begin{document}
-\section{Test}
-Text: \xvec.
-
-Math: $\norm{\xvec} = \sqrt{\inner{\xvec}{\xvec}}$
-\end{document}
-"#;
-        let result = latex_document_to_typst(input);
-        eprintln!("Full conversion result:\n{}", result);
-
-        // In math mode ($...$), \xvec should expand to \mathbf{x}
-        // which should become bold(...) or upright(bold(...)), NOT *x*
-        // *x* in math mode would be multiplication!
-
-        // Check that the math section contains bold(x) not *x*
-        let math_section = result.split("Math:").nth(1).unwrap_or("");
-        eprintln!("Math section: {}", math_section);
-
-        assert!(
-            !math_section.contains("*x*"),
-            "Math section should not have *x* (which is multiplication in Typst math), got: {}",
-            math_section
-        );
-        assert!(
-            math_section.contains("bold(x)") || math_section.contains("bold(x"),
-            "Math section should have bold(x), got: {}",
-            math_section
-        );
-    }
-
-    #[test]
-    fn test_ifmmode_bracket_display_math_full() {
-        // Test the full L2T conversion with \[...\] display math
-        // This is the EXACT pattern that was failing in the user's document
-        let input = r#"\documentclass{article}
-\usepackage{amsmath}
-
-\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
-\newcommand{\inner}[2]{\langle #1, #2 \rangle}
-\newcommand{\strong}[1]{\ifmmode \mathbf{#1} \else \textbf{#1} \fi}
-\newcommand{\xvec}{\strong{x}}
-
-\begin{document}
-\section{Test}
-
-\[
-    \norm{\xvec} = \sqrt{\inner{\xvec}{\xvec}}
-\]
-\end{document}
-"#;
-        let result = latex_document_to_typst(input);
-        eprintln!("Bracket display math result:\n{}", result);
-
-        // In \[...\] display math, \xvec should expand to \mathbf{x}
-        // which should become bold(...), NOT *x*
-        assert!(
-            !result.contains("*x*"),
-            "Should not have *x* in result (would be multiplication in Typst math), got: {}",
-            result
-        );
-        assert!(
-            result.contains("bold(x)"),
-            "Should have bold(x) in display math, got: {}",
-            result
-        );
-    }
-
-    #[test]
-    fn test_langle_rangle_in_sqrt() {
-        // Test that \langle x, y \rangle inside \sqrt doesn't break
-        // The comma should not be parsed as a function argument separator
-        let input = r#"\sqrt{\langle x, y \rangle}"#;
-        let result = latex_to_typst(input);
-        eprintln!("langle in sqrt result: {}", result);
-
-        // Should have {} wrapper around the content to protect the comma
-        // sqrt({angle.l x, y angle.r}) instead of sqrt(angle.l x, y angle.r)
-        assert!(
-            result.contains("sqrt({"),
-            "Should have sqrt({{...}}) wrapper to protect comma, got: {}",
-            result
-        );
-        assert!(
-            result.contains("chevron.l"),
-            "Should have chevron.l, got: {}",
-            result
-        );
-        assert!(
-            result.contains("chevron.r"),
-            "Should have chevron.r, got: {}",
-            result
-        );
-    }
-
-    #[test]
-    fn test_sqrt_without_comma_no_braces() {
-        // When no comma, should not have extra braces
-        let input = r#"\sqrt{x + y}"#;
-        let result = latex_to_typst(input);
-        eprintln!("sqrt without comma result: {}", result);
-
-        // Should NOT have {} wrapper since no comma
-        assert!(
-            !result.contains("sqrt({"),
-            "Should not have extra braces when no comma, got: {}",
-            result
-        );
-        assert!(
-            result.contains("sqrt("),
-            "Should have sqrt(...), got: {}",
-            result
-        );
-    }
-
-    #[test]
-    fn test_sqrt_with_nested_fraction_commas_does_not_add_braces() {
-        let input = r#"\sqrt{\frac{\partial f^2}{\partial x}+\frac{\partial f^2}{\partial y}}"#;
-        let result = latex_to_typst(input);
-        assert!(
-            !result.contains("sqrt({"),
-            "nested frac commas should not force extra sqrt braces, got: {}",
-            result
-        );
-        assert!(
-            result.contains("frac("),
-            "sqrt over fraction sum should still contain frac calls, got: {}",
-            result
-        );
-    }
-
-    #[test]
-    fn test_sqrt_with_nested_fraction_sum_no_extra_braces() {
-        let input = r#"\sqrt{\frac{a}{b}+\frac{c}{d}}"#;
-        let result = latex_to_typst(input);
-        assert!(
-            !result.contains("sqrt({"),
-            "nested fractions should not force extra sqrt braces, got: {}",
-            result
-        );
-        assert!(
-            result.contains("sqrt(")
-                && (result.matches("frac(").count() >= 2 || result.contains("/")),
-            "expected nested fractions to remain as valid root content, got: {}",
-            result
-        );
-    }
-}

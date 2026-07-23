@@ -43,7 +43,11 @@ mitex-spec = "0.2"
 mitex-spec-gen = "0.2"
 
 # Typst dependencies
-typst-syntax = "0.14"
+typst = "=0.15.1"
+typst-eval = "=0.15.1"
+typst-realize = "=0.15.1"
+typst-kit = { version = "=0.15.1", features = ["embedded-fonts", "scan-fonts", "system-files", "system-packages", "universe-packages", "system-downloader", "datetime"] }
+typst-assets = "=0.15.1"
 
 # Utilities
 clap = { version = "4.4", features = ["derive"], optional = true }
@@ -66,6 +70,12 @@ serde_json = { version = "1.0", optional = true }
 serde_yaml = { version = "0.9", optional = true }
 csv = { version = "1.3", optional = true }
 toml = { version = "0.8", optional = true }
+typst-library = "0.15.1"
+comemo = "0.5.1"
+typst-utils = "0.15.1"
+# Transitive dependency of typst; used directly for `codex::styling::MathVariant`
+# (the math font variant enum), which typst-library does not re-export.
+codex = "=0.3.0"
 
 # Native-only dependencies (used by `tylax::batch`, which is gated to non-wasm targets)
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -79,6 +89,7 @@ data-loading = ["dep:serde", "dep:serde_json", "dep:serde_yaml", "dep:csv", "dep
 
 [dev-dependencies]
 pretty_assertions = "1.4"
+tempfile = "3"
 
 [profile.release]
 opt-level = "s"

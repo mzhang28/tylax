@@ -44,6 +44,24 @@ impl DocumentWrapperMode {
     }
 }
 
+/// How to treat Typst constructs that Tylax cannot faithfully lower to LaTeX.
+///
+/// Default is [`UnsupportedMode::Error`]: per PLAN.md, an unsupported construct
+/// must be impossible to miss rather than silently disappearing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum UnsupportedMode {
+    /// Stop conversion and report the element, its source location, and its
+    /// originating package (if any).
+    #[default]
+    Error,
+    /// Emit a visible `\texttt{[unsupported Typst element: ...]}` marker in
+    /// place of the construct and continue.
+    Raw,
+    /// Render just that subtree through Typst and embed it as an image.
+    /// (Not yet implemented; selecting it currently errors explicitly.)
+    Image,
+}
+
 /// Options for Typst to LaTeX conversion
 #[derive(Debug, Clone)]
 pub struct T2LOptions {
@@ -63,6 +81,8 @@ pub struct T2LOptions {
     /// Controls the LaTeX document wrapper when `full_document` is true.
     /// Default: [`DocumentWrapperMode::Default`].
     pub wrapper: DocumentWrapperMode,
+    /// How to treat Typst constructs Tylax cannot lower. Default: `Error`.
+    pub unsupported: UnsupportedMode,
 }
 
 impl Default for T2LOptions {
@@ -75,6 +95,7 @@ impl Default for T2LOptions {
             math_only: false,
             block_math_mode: true,
             wrapper: DocumentWrapperMode::Default,
+            unsupported: UnsupportedMode::Error,
         }
     }
 }

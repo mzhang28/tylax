@@ -13,7 +13,7 @@ use tylax::{
     diagnostics::{check_latex, format_diagnostics},
     latex_document_to_typst, latex_to_typst, latex_to_typst_with_diagnostics_options,
     tikz::{convert_cetz_to_tikz, convert_tikz_to_cetz, is_cetz_code},
-    typst_document_to_latex, typst_to_latex, typst_to_latex_with_diagnostics, CliDiagnostic,
+     CliDiagnostic,
     DocumentWrapperMode, L2TOptions, PreambleMode, T2LOptions,
 };
 
@@ -42,6 +42,11 @@ struct Cli {
     /// Full document mode (convert entire document, not just math)
     #[arg(short = 'f', long)]
     full_document: bool,
+
+    /// Policy for Typst constructs Tylax cannot lower (T2L only):
+    /// error (stop and report), raw (emit a visible marker), or image.
+    #[arg(long, value_enum, default_value_t = UnsupportedArg::Error, global = true)]
+    unsupported: UnsupportedArg,
 
     /// Pretty print the output
     #[arg(short, long)]
@@ -174,6 +179,28 @@ enum Commands {
 }
 
 #[cfg(feature = "cli")]
+#[derive(Clone, Copy, ValueEnum)]
+enum UnsupportedArg {
+    /// Stop and report unsupported constructs (default).
+    Error,
+    /// Emit a visible `\texttt{[unsupported ...]}` marker and continue.
+    Raw,
+    /// Render the unsupported subtree via Typst and embed it (not yet implemented).
+    Image,
+}
+
+#[cfg(feature = "cli")]
+impl From<UnsupportedArg> for tylax::UnsupportedMode {
+    fn from(a: UnsupportedArg) -> Self {
+        match a {
+            UnsupportedArg::Error => tylax::UnsupportedMode::Error,
+            UnsupportedArg::Raw => tylax::UnsupportedMode::Raw,
+            UnsupportedArg::Image => tylax::UnsupportedMode::Image,
+        }
+    }
+}
+
+#[cfg(feature = "cli")]
 #[derive(Clone, ValueEnum)]
 enum TikzDirection {
     /// Auto-detect based on content
@@ -201,7 +228,7 @@ fn main() -> io::Result<()> {
 
     // Handle subcommands first
     if let Some(cmd) = cli.command {
-        return handle_subcommand(cmd);
+        return handle_subcommand(cmd, cli.unsupported.into());
     }
 
     // Read input
@@ -290,23 +317,24 @@ fn main() -> io::Result<()> {
             let options = T2LOptions {
                 full_document: is_full_document,
                 wrapper: wrapper_mode,
+                unsupported: cli.unsupported.into(),
                 ..Default::default()
             };
-            if !cli.no_eval {
-                let conv_result = typst_to_latex_with_diagnostics(&input, &options);
-                let diags = conv_result
-                    .warnings
-                    .into_iter()
-                    .map(CliDiagnostic::from)
-                    .collect();
-                (conv_result.output, diags)
-            } else {
-                let output = if is_full_document {
-                    typst_document_to_latex(&input)
-                } else {
-                    typst_to_latex(&input)
-                };
-                (output, Vec::new())
+            let (main_path, project_root, _guard) =
+                resolve_t2l_input(filename.as_deref(), &input)?;
+            match tylax::core::typst2latex::convert(&main_path, &project_root, &options) {
+                Ok(conv_result) => {
+                    let diags = conv_result
+                        .warnings
+                        .into_iter()
+                        .map(CliDiagnostic::from)
+                        .collect();
+                    (conv_result.output, diags)
+                }
+                Err(e) => {
+                    eprintln!("Error: {e}");
+                    std::process::exit(1);
+                }
             }
         }
         Direction::Auto => {
@@ -371,7 +399,7 @@ fn main() -> io::Result<()> {
 }
 
 #[cfg(feature = "cli")]
-fn handle_subcommand(cmd: Commands) -> io::Result<()> {
+fn handle_subcommand(cmd: Commands, unsupported: tylax::UnsupportedMode) -> io::Result<()> {
     match cmd {
         Commands::Check { input, no_color } => {
             let content = match input {
@@ -437,13 +465,27 @@ fn handle_subcommand(cmd: Commands) -> io::Result<()> {
             let result = if full_document {
                 match direction {
                     Direction::L2t => latex_document_to_typst(&content),
-                    Direction::T2l => typst_document_to_latex(&content),
+                    Direction::T2l => {
+                        let (main_path, project_root, _guard) =
+                            resolve_t2l_input(filename.as_deref(), &content)?;
+                        let options = tylax::T2LOptions {
+                            full_document: true,
+                            unsupported,
+                            ..Default::default()
+                        };
+                        run_t2l_or_exit(&main_path, &project_root, &options)
+                    }
                     Direction::Auto => convert_auto_document(&content).0,
                 }
             } else {
                 match direction {
                     Direction::L2t => latex_to_typst(&content),
-                    Direction::T2l => typst_to_latex(&content),
+                    Direction::T2l => {
+                        let (main_path, project_root, _guard) =
+                            resolve_t2l_input(filename.as_deref(), &content)?;
+                        let options = tylax::T2LOptions { unsupported, ..Default::default() };
+                        run_t2l_or_exit(&main_path, &project_root, &options)
+                    }
                     Direction::Auto => convert_auto(&content).0,
                 }
             };
@@ -622,6 +664,73 @@ fn pretty_print(input: &str) -> String {
     }
 
     result.trim().to_string()
+}
+
+/// Resolve a `(main_file_path, project_root)` pair for T2L conversion.
+///
+/// `tylax::core::typst2latex::convert` needs a real path on disk (to resolve
+/// relative imports, images, etc.), so when input comes from stdin (no
+/// filename) we materialize it into a scratch directory instead of passing
+/// an empty path. The returned guard removes that scratch directory on drop.
+#[cfg(feature = "cli")]
+fn resolve_t2l_input(
+    filename: Option<&str>,
+    content: &str,
+) -> io::Result<(std::path::PathBuf, std::path::PathBuf, Option<StdinScratchDir>)> {
+    if let Some(f) = filename {
+        // Resolve to an absolute path so `path` and `root` are always in the
+        // same (absolute) coordinate space. A bare filename like `algebra.typ`
+        // has an empty parent, and leaving it relative while `root` falls back
+        // to the absolute cwd makes `main_path.strip_prefix(root)` fail later
+        // in `TylaxWorld::new` — which silently converts `main.typ` instead.
+        let raw = std::path::PathBuf::from(f);
+        let path = if raw.is_absolute() {
+            raw
+        } else {
+            std::env::current_dir()?.join(raw)
+        };
+        let root = path
+            .parent()
+            .filter(|p| !p.as_os_str().is_empty())
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
+        Ok((path, root, None))
+    } else {
+        let dir = std::env::temp_dir().join(format!("tylax-t2l-stdin-{}", std::process::id()));
+        fs::create_dir_all(&dir)?;
+        let main = dir.join("main.typ");
+        fs::write(&main, content)?;
+        Ok((main, dir.clone(), Some(StdinScratchDir(dir))))
+    }
+}
+
+/// Removes the scratch directory created by `resolve_t2l_input` for stdin
+/// input once conversion is done.
+#[cfg(feature = "cli")]
+struct StdinScratchDir(std::path::PathBuf);
+
+#[cfg(feature = "cli")]
+impl Drop for StdinScratchDir {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.0);
+    }
+}
+
+/// Run T2L conversion, printing the error and exiting non-zero on a hard
+/// conversion failure instead of emitting plausible-looking wrong LaTeX.
+#[cfg(feature = "cli")]
+fn run_t2l_or_exit(
+    main_path: &std::path::Path,
+    project_root: &std::path::Path,
+    options: &tylax::T2LOptions,
+) -> String {
+    match tylax::core::typst2latex::convert(main_path, project_root, options) {
+        Ok(result) => result.output,
+        Err(e) => {
+            eprintln!("Error: {e}");
+            std::process::exit(1);
+        }
+    }
 }
 
 #[cfg(feature = "cli")]
