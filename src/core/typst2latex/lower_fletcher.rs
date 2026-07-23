@@ -38,7 +38,11 @@ pub fn lower_diagram(body: &Content, styles: StyleChain, ctx: &mut LowerContext)
 }
 
 fn tikzcd(rows: String) -> LatexIr {
-    LatexIr::Latex(format!("\\[\n\\begin{{tikzcd}}\n{rows}\n\\end{{tikzcd}}\n\\]\n"))
+    // `tikzcd` is a standalone environment; we do NOT wrap it in `\[ … \]`.
+    // Display math would break when a diagram appears inside a table cell
+    // (diagrams-in-a-`#table` is a real case), and tikzcd renders fine on its
+    // own. It is emitted on its own lines so it sits in its own paragraph.
+    LatexIr::Latex(format!("\n\\begin{{tikzcd}}\n{rows}\n\\end{{tikzcd}}\n"))
 }
 
 // ---------------------------------------------------------------------------
