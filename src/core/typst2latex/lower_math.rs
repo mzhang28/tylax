@@ -458,11 +458,16 @@ fn push_glyph(ch: char, styles: StyleChain, out: &mut String) {
         // grouping): escape so they don't act as LaTeX groups.
         '{' => "\\{".to_string(),
         '}' => "\\}".to_string(),
+        // A bare vertical bar is a "such that"/"divides"/"given" relation
+        // (e.g. set-builder `{ x | P }`), which wants relation spacing.
+        // Absolute-value/norm bars don't reach here — they come through the
+        // `LrElem` delimiter path as `\left| … \right|`.
+        '|' => "\\mid ".to_string(),
         _ => {
             if let Some(latex) = UNICODE_TO_LATEX.get(&ch) {
                 format!("{latex} ")
             } else if ch.is_ascii_alphanumeric()
-                || matches!(ch, '+' | '-' | '=' | '<' | '>' | '(' | ')' | '[' | ']' | '/' | '!' | '|' | ',' | '.' | ':' | ';' | '?')
+                || matches!(ch, '+' | '-' | '=' | '<' | '>' | '(' | ')' | '[' | ']' | '/' | '!' | ',' | '.' | ':' | ';' | '?')
             {
                 ch.to_string()
             } else {

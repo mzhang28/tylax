@@ -801,13 +801,13 @@ As always, we need to find a functor, because the rules governing morphisms will
 Time to define action on objects. For some arbitrary object \ensuremath{Q \in {\mathsf{DA}}_{\mathcal{L}}}, we'd like to produce the reverse automaton. We can start with what we expect \ensuremath{{\delta }_{{Q}^{'}}}, the \ensuremath{\delta} of the transformed automaton to be. It should be some sort of reversing function, so we should be taking the pre-image of \ensuremath{{\delta }_{Q}}:
 
 \[
-{\delta }_{{Q}^{'}} :\equiv \left( q, s \right) \mapsto \left\{ {q}^{'} \in Q | \delta \left( {q}^{'}, s \right) = q \right\}
+{\delta }_{{Q}^{'}} :\equiv \left( q, s \right) \mapsto \left\{ {q}^{'} \in Q \mid \delta \left( {q}^{'}, s \right) = q \right\}
 \]
 
 But this doesn't type-check. The result is a set, since multiple \ensuremath{{q}^{'}}s could map to the same \ensuremath{q} under the old \ensuremath{\delta}. This means our state space fundamentally needs to be a powerset of \ensuremath{Q}. In that case, \ensuremath{{\delta }_{{Q}^{'}}}'s type would need to be \ensuremath{\mathcal{P}\left( Q \right) \times \Sigma \rightarrow \mathcal{P}\left( Q \right)}. We can update the function to look like this:
 
 \[
-{\delta }_{{Q}^{'}} :\equiv \left( q, s \right) \mapsto \left\{ {q}^{'} \in Q | \delta \left( {q}^{'}, s \right) \in q \right\}
+{\delta }_{{Q}^{'}} :\equiv \left( q, s \right) \mapsto \left\{ {q}^{'} \in Q \mid \delta \left( {q}^{'}, s \right) \in q \right\}
 \]\label{preImageDelta} 
 
 We can essentially fill in the rest of the definitions now:
@@ -857,15 +857,15 @@ and really, both \ensuremath{{\mathcal{P}}^{∗}} and \ensuremath{\operatorname{
 \end{aligned}
 \]
 
-We can show this via creating a bijection. First, the forward direction: define \ensuremath{\mathsf{fwd} : \mathbf{Hom}\left( Y, \mathcal{P}\left( X \right) \right) \rightarrow \mathbf{Hom}\left( X, \mathcal{P}\left( Y \right) \right)} with the function \ensuremath{\lambda \left( f : Y \rightarrow \mathcal{P}\left( X \right) \right) . \lambda \left( x : X \right) . \left\{ y \in Y | x \in f\left( y \right) \right\}}. \footnote{Sorry about the sudden lambda notation, I needed to see the type of the argument inline for a second\ldots{}}
+We can show this via creating a bijection. First, the forward direction: define \ensuremath{\mathsf{fwd} : \mathbf{Hom}\left( Y, \mathcal{P}\left( X \right) \right) \rightarrow \mathbf{Hom}\left( X, \mathcal{P}\left( Y \right) \right)} with the function \ensuremath{\lambda \left( f : Y \rightarrow \mathcal{P}\left( X \right) \right) . \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in f\left( y \right) \right\}}. \footnote{Sorry about the sudden lambda notation, I needed to see the type of the argument inline for a second\ldots{}}
 
-Then, define the inverse direction \ensuremath{\mathsf{bwd} : \mathbf{Hom}\left( X, \mathcal{P}\left( Y \right) \right) \rightarrow \mathbf{Hom}\left( Y, \mathcal{P}\left( X \right) \right)} with the function \ensuremath{\lambda \left( g : X \rightarrow \mathcal{P}\left( Y \right) \right) . \lambda \left( y : Y \right) . \left\{ x \in X | y \in g\left( x \right) \right\}}.
+Then, define the inverse direction \ensuremath{\mathsf{bwd} : \mathbf{Hom}\left( X, \mathcal{P}\left( Y \right) \right) \rightarrow \mathbf{Hom}\left( Y, \mathcal{P}\left( X \right) \right)} with the function \ensuremath{\lambda \left( g : X \rightarrow \mathcal{P}\left( Y \right) \right) . \lambda \left( y : Y \right) . \left\{ x \in X \mid y \in g\left( x \right) \right\}}.
 
 It's easily to show the inverses compose to the identity:
 
 \[
 \begin{aligned}
-\forall f . f & = \mathsf{bwd}\left( \mathsf{fwd}\left( f \right) \right) \\ & = \lambda \left( y : Y \right) . \left\{ x \in X | y \in \mathsf{fwd}\left( f \right)\left( x \right) \right\} \\ & = \lambda \left( y : Y \right) . \left\{ x \in X | y \in \left( \lambda \left( x : X \right) . \left\{ y \in Y | x \in f\left( y \right) \right\} \right)\left( x \right) \right\} \\ & = \lambda \left( y : Y \right) . \left\{ x \in X | y \in \left\{ y \in Y | x \in f\left( y \right) \right\} \right\} \\ & = \lambda \left( y : Y \right) . \left\{ x \in X | x \in f\left( y \right) \right\} \} \\ & = \lambda \left( y : Y \right) . f\left( y \right) \} \} \\ & = f \\
+\forall f . f & = \mathsf{bwd}\left( \mathsf{fwd}\left( f \right) \right) \\ & = \lambda \left( y : Y \right) . \left\{ x \in X \mid y \in \mathsf{fwd}\left( f \right)\left( x \right) \right\} \\ & = \lambda \left( y : Y \right) . \left\{ x \in X \mid y \in \left( \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in f\left( y \right) \right\} \right)\left( x \right) \right\} \\ & = \lambda \left( y : Y \right) . \left\{ x \in X \mid y \in \left\{ y \in Y \mid x \in f\left( y \right) \right\} \right\} \\ & = \lambda \left( y : Y \right) . \left\{ x \in X \mid x \in f\left( y \right) \right\} \} \\ & = \lambda \left( y : Y \right) . f\left( y \right) \} \} \\ & = f \\
 \end{aligned}
 \]
 
@@ -873,7 +873,7 @@ and the other way:
 
 \[
 \begin{aligned}
-\forall g . g & = \mathsf{fwd}\left( \mathsf{bwd}\left( g \right) \right) \\ & = \lambda \left( x : X \right) . \left\{ y \in Y | x \in \mathsf{bwd}\left( g \right)\left( y \right) \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y | x \in \left( \lambda \left( y : Y \right) . \left\{ x \in X | y \in g\left( x \right) \right\} \right)\left( y \right) \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y | x \in \left\{ x \in X | y \in g\left( x \right) \right\} \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y | y \in g\left( x \right) \right\} \\ & = \lambda \left( x : X \right) . g\left( x \right) \\ & = g \\
+\forall g . g & = \mathsf{fwd}\left( \mathsf{bwd}\left( g \right) \right) \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in \mathsf{bwd}\left( g \right)\left( y \right) \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in \left( \lambda \left( y : Y \right) . \left\{ x \in X \mid y \in g\left( x \right) \right\} \right)\left( y \right) \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in \left\{ x \in X \mid y \in g\left( x \right) \right\} \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid y \in g\left( x \right) \right\} \\ & = \lambda \left( x : X \right) . g\left( x \right) \\ & = g \\
 \end{aligned}
 \]  ⁠ \ensuremath{\square}
 
