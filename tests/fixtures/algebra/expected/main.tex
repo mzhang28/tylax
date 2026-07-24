@@ -194,8 +194,8 @@ For example, consider any other \ensuremath{F}-algebra \ensuremath{\beta : \left
 
 \begin{center}
 \begin{tikzcd}
-1 + X \arrow[r] \arrow[d, "{F\left( f \right)}"] & X \arrow[d, "{f}"] \\
-1 + Y \arrow[r] & Y
+1 + X \arrow[r, "{\alpha}"] \arrow[d, "{F\left( f \right)}"] & X \arrow[d, "{f}"] \\
+1 + Y \arrow[r, "{\beta}"'] & Y
 \end{tikzcd}
 \end{center}
 
@@ -262,7 +262,7 @@ There seems to be some parallel between the structure of \ensuremath{F\left( X \
 
 \begin{center}
 \begin{tikzcd}
-F\left( X \right) \arrow[r] & X
+F\left( X \right) \arrow[r, "{\alpha}"] & X
 \end{tikzcd}
 \end{center}
 
@@ -272,7 +272,7 @@ which is initial in the category of \ensuremath{F}-algebras. Let us "use" this i
 
 \begin{center}
 \begin{tikzcd}
-F\left( X \right) \arrow[r] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
+F\left( X \right) \arrow[r, "{\alpha}"] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
 ? \arrow[r, "{?}"'] & ? \\
 {} & {}
 \end{tikzcd}
@@ -284,7 +284,7 @@ We will choose the particular \ensuremath{F}-algebra defined by applying \ensure
 
 \begin{center}
 \begin{tikzcd}
-F\left( X \right) \arrow[r] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
+F\left( X \right) \arrow[r, "{\alpha}"] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
 F\left( F\left( X \right) \right) \arrow[r, "{F\left( \alpha \right)}"'] & F\left( X \right) \\
 {} & {}
 \end{tikzcd}
@@ -321,7 +321,7 @@ This is the first half of our proof. It remains to be shown that \ensuremath{! \
 
 \begin{center}
 \begin{tikzcd}
-F\left( X \right) \arrow[r] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
+F\left( X \right) \arrow[r, "{\alpha}"] \arrow[d, "{F\left( ! \right)}"] & X \arrow[d, "{!}"] \\
 F\left( F\left( X \right) \right) \arrow[r, "{F\left( \alpha \right)}"'] & F\left( X \right) \\
 {} & {}
 \end{tikzcd}
@@ -554,7 +554,7 @@ Visually, we can represent an automaton like this:
 
 \begin{center}
 \begin{tikzcd}
-{q}_{0} \arrow[rr, "{a}"] & {q}_{1} & {q}_{2}
+{} \arrow[r, "{start}"] & {q}_{0} \arrow[r, "{b}"] \arrow[rr, "{a}"] & {q}_{1} \arrow[r, "{c}"] \arrow[loop above, "{b}"] & {q}_{2}
 \end{tikzcd}
 \end{center}
 
@@ -594,7 +594,7 @@ For this section, we will consider a particular problem concerning automata: the
 
 \begin{center}
 \begin{tikzcd}
-{} & {} \arrow[l, "{a}"]
+{q}_{0} \arrow[r, "{a}"] & {q}_{1} \arrow[r, "{a}"] & {q}_{2} \arrow[r, "{a}"] & {q}_{3} \arrow[lll, "{a}"]
 \end{tikzcd}
 \end{center}
 
@@ -886,8 +886,8 @@ We will devise a functor called \ensuremath{\overline{2}}, which is self-dual, t
 
 \begin{center}
 \begin{tikzcd}
-{\mathsf{DA}}_{\mathcal{L}} \arrow[r, "{\overline{2}}"] \arrow[r] \arrow[r, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
-\mathbf{Set} \arrow[r, "{{\mathcal{P}}^{∗}}"] \arrow[r] \arrow[r, leftarrow, "{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
+{\mathsf{DA}}_{\mathcal{L}} \arrow[r, "{\overline{2}}"] \arrow[r, "{\perp}"] \arrow[r, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
+\mathbf{Set} \arrow[r, "{{\mathcal{P}}^{∗}}"] \arrow[r, "{\perp}"] \arrow[r, leftarrow, "{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
 \end{tikzcd}
 \end{center}
 
@@ -1040,9 +1040,9 @@ The corresponding adjoint functor for \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}},
 
 \begin{center}
 \begin{tikzcd}
-{} & {\mathsf{DA}}_{\mathcal{L}} & {} \\
-{\mathsf{rDA}}_{\mathcal{L}} & {} & {\mathsf{oDA}}_{\mathcal{L}} \\
-{} & {\mathsf{mDA}}_{\mathcal{L}} & {}
+{} & {\mathsf{DA}}_{\mathcal{L}} \arrow[dl, "{R}"] \arrow[dr, "{O}"] & {} \\
+{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook] \arrow[ur, "{\perp}"] \arrow[dr, "{⊤}"] \arrow[dr, "{O}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook] \arrow[ul, "{⊤}"] \arrow[dl, "{\perp}"] \arrow[dl, "{R}"] \\
+{} & {\mathsf{mDA}}_{\mathcal{L}} \arrow[ul, hook] \arrow[ur, hook] & {}
 \end{tikzcd}
 \end{center}
 
@@ -1052,9 +1052,9 @@ Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a funct
 
 \begin{center}
 \begin{tikzcd}
-{} &  & {} & {} & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} & {} \\
-{\mathsf{rDA}}_{\mathcal{L}} & {} & {\mathsf{oDA}}_{\mathcal{L}} & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \\
-{} &  & {} & {} & {{\mathsf{mDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} & {}
+{} &  \arrow[dl, "{R}"] \arrow[dr, "{O}"] & {} & {} & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[dl, "{{R}^{\mathsf{op}}}"] \arrow[dr, "{{O}^{\mathsf{op}}}"] & {} \\
+{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook] \arrow[ur, "{\perp}"] \arrow[dr, "{⊤}"] \arrow[dr, "{O}"] \arrow[rrrrr, "{\overline{2}}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook] \arrow[ul, "{⊤}"] \arrow[dl, "{\perp}"] \arrow[dl, "{R}"] & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ur, hook] \arrow[ur, "{\perp}"] \arrow[dr, "{⊤}"] \arrow[dr, "{{O}^{\mathsf{op}}}"] & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook] \arrow[ul, "{⊤}"] \arrow[dl, "{\perp}"] \arrow[dl, "{{R}^{\mathsf{op}}}"] \\
+{} &  \arrow[ul, hook] \arrow[ur, hook] & {} & {} & {{\mathsf{mDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook] \arrow[ur, hook] \arrow[lll, "{{\overline{2}}^{\mathsf{op}}}"] & {}
 \end{tikzcd}
 \end{center}
 

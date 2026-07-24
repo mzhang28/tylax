@@ -24,6 +24,8 @@ struct Edge {
     label: Option<Content>,
     from: Option<(f64, f64)>,
     to: Option<(f64, f64)>,
+    from_name: Option<String>,
+    to_name: Option<String>,
     side_right: bool,
 }
 
@@ -100,6 +102,8 @@ fn parse_edge(dict: &Dict) -> Edge {
         label: dict_content(dict, "label"),
         from: dict_coord(dict, "from"),
         to: dict_coord(dict, "to"),
+        from_name: dict_str(dict, "from-name"),
+        to_name: dict_str(dict, "to-name"),
         side_right,
     }
 }
@@ -251,18 +255,66 @@ fn matrix_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> St
 // ---------------------------------------------------------------------------
 
 fn coordinate_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -> String {
-    let mut nodes: Vec<(f64, f64, Content)> = Vec::new();
-    let mut edges: Vec<Edge> = Vec::new();
-    collect_coordinate(body, &mut nodes, &mut edges);
+    // Collect nodes and edges *in document order* so that fletcher's implicit
+    // edges (an `edge(...)` with no coordinates, which connects the preceding
+    // node to the following node in argument order) can be resolved.
+    let mut items: Vec<Item> = Vec::new();
+    let mut cursor = (0.0, 0.0);
+    collect_items(body, &mut items, &mut cursor);
+
+    let nodes: Vec<(f64, f64, Content)> = items
+        .iter()
+        .filter_map(|it| match it {
+            Item::Node(x, y, c, _) => Some((*x, *y, c.clone())),
+            _ => None,
+        })
+        .collect();
+
+    // Map node names (`node(.., name: <foo>)`) to coordinates, so edges can
+    // reference endpoints by name.
+    let by_name: std::collections::HashMap<&str, (f64, f64)> = items
+        .iter()
+        .filter_map(|it| match it {
+            Item::Node(x, y, _, Some(name)) => Some((name.as_str(), (*x, *y))),
+            _ => None,
+        })
+        .collect();
+
+    // Resolve each edge to a concrete (from, to) coordinate pair:
+    //   * explicit `from`/`to` coordinates, or `from-name`/`to-name` references;
+    //   * `from` + direction string → step one grid cell per letter;
+    //   * no coordinates → connect the nearest node before to the nearest node
+    //     after this edge in document order (fletcher's implicit connection).
+    let mut resolved: Vec<((f64, f64), (f64, f64), &Edge)> = Vec::new();
+    for (i, it) in items.iter().enumerate() {
+        let Item::Edge(e) = it else { continue };
+        let from = e.from.or_else(|| e.from_name.as_deref().and_then(|n| by_name.get(n).copied()));
+        let to = e.to.or_else(|| e.to_name.as_deref().and_then(|n| by_name.get(n).copied()));
+        let pair = if let Some(from) = from {
+            let to = to.or_else(|| e.dir.as_deref().map(|d| {
+                let (dc, dr) = dir_delta(d);
+                (from.0 + dc as f64, from.1 + dr as f64)
+            }));
+            to.map(|to| (from, to))
+        } else if to.is_none() && e.dir.is_none() {
+            // Implicit: previous node → next node.
+            let before = items[..i].iter().rev().find_map(node_coord);
+            let after = items[i + 1..].iter().find_map(node_coord);
+            before.zip(after)
+        } else {
+            None
+        };
+        if let Some((from, to)) = pair {
+            resolved.push((from, to, e));
+        }
+    }
 
     // Build sorted, de-duplicated column (x) and row (y) axes.
     let mut xs: Vec<f64> = nodes.iter().map(|n| n.0).collect();
     let mut ys: Vec<f64> = nodes.iter().map(|n| n.1).collect();
-    for e in &edges {
-        for c in [e.from, e.to].into_iter().flatten() {
-            xs.push(c.0);
-            ys.push(c.1);
-        }
+    for (from, to, _) in &resolved {
+        xs.push(from.0); xs.push(to.0);
+        ys.push(from.1); ys.push(to.1);
     }
     dedup_axis(&mut xs);
     dedup_axis(&mut ys);
@@ -276,13 +328,15 @@ fn coordinate_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -
     for (x, y, content) in &nodes {
         grid[row_of(*y)][col_of(*x)] = lower_math_fragment(content, styles, ctx).trim().to_string();
     }
-    for edge in &edges {
-        // Only edges between two distinct grid points map cleanly to a
-        // tikz-cd arrow. Skip self-loops and coordinate-less edges (e.g. the
-        // direction-only or bent edges in automaton-style diagrams) rather than
-        // emitting an arrow to a non-existent cell, which breaks compilation.
-        let (Some(from), Some(to)) = (edge.from, edge.to) else { continue };
+    for (from, to, edge) in &resolved {
+        let (from, to) = (*from, *to);
+        let cell_rc = (row_of(from.1), col_of(from.0));
         if (from.0 - to.0).abs() < 1e-6 && (from.1 - to.1).abs() < 1e-6 {
+            // Self-loop (e.g. an automaton state transitioning to itself).
+            let a = arrow("loop above", edge, styles, ctx);
+            let cell = &mut grid[cell_rc.0][cell_rc.1];
+            cell.push(' ');
+            cell.push_str(&a);
             continue;
         }
         // Direction is in terms of *grid indices*, not raw coordinates:
@@ -291,7 +345,7 @@ fn coordinate_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -
         let dcol = col_of(to.0) as i64 - col_of(from.0) as i64;
         let drow = row_of(to.1) as i64 - row_of(from.1) as i64;
         let dir = index_dir(dcol, drow);
-        let cell = &mut grid[row_of(from.1)][col_of(from.0)];
+        let cell = &mut grid[cell_rc.0][cell_rc.1];
         cell.push(' ');
         cell.push_str(&arrow(&dir, edge, styles, ctx));
     }
@@ -302,29 +356,88 @@ fn coordinate_rows(body: &Content, styles: StyleChain, ctx: &mut LowerContext) -
         .join(" \\\\\n")
 }
 
-fn collect_coordinate(content: &Content, nodes: &mut Vec<(f64, f64, Content)>, edges: &mut Vec<Edge>) {
+/// A diagram object in document order.
+enum Item {
+    Node(f64, f64, Content, Option<String>),
+    Edge(Edge),
+}
+
+fn node_coord(it: &Item) -> Option<(f64, f64)> {
+    match it {
+        Item::Node(x, y, _, _) => Some((*x, *y)),
+        _ => None,
+    }
+}
+
+fn collect_items(content: &Content, items: &mut Vec<Item>, cursor: &mut (f64, f64)) {
     if let Some(dict) = marker(content, "fletcher-node") {
-        if let (Some((x, y)), Some(b)) = (dict_coord(dict, "coord"), dict_content(dict, "body")) {
-            nodes.push((x, y, b));
+        if let (Some(coord), Some(b)) = (node_abs_coord(dict, cursor), dict_content(dict, "body")) {
+            items.push(Item::Node(coord.0, coord.1, b, dict_str(dict, "name")));
         }
         return;
     }
     if let Some(dict) = marker(content, "fletcher-edge") {
-        edges.push(parse_edge(dict));
+        items.push(Item::Edge(parse_edge(dict)));
         return;
     }
     if let Some(seq) = content.to_packed::<SequenceElem>() {
         for c in seq.children.iter() {
-            collect_coordinate(c, nodes, edges);
+            collect_items(c, items, cursor);
         }
     } else if let Some(styled) = content.to_packed::<typst::foundations::StyledElem>() {
-        collect_coordinate(&styled.child, nodes, edges);
+        collect_items(&styled.child, items, cursor);
+    }
+}
+
+/// Resolve a node's coordinate to an absolute `(x, y)`, updating the running
+/// `cursor`. Handles both an absolute `[x, y]` and a relative `(rel: (dx, dy))`
+/// coordinate (fletcher lets a node be positioned relative to the previous one).
+fn node_abs_coord(dict: &Dict, cursor: &mut (f64, f64)) -> Option<(f64, f64)> {
+    match dict.get(&Str::from("coord")).ok()? {
+        Value::Array(_) => {
+            let c = dict_coord(dict, "coord")?;
+            *cursor = c;
+            Some(c)
+        }
+        Value::Dict(d) => {
+            // Relative: `(rel: (dx, dy))`.
+            let Value::Array(a) = d.get(&Str::from("rel")).ok()? else { return None };
+            if a.len() != 2 {
+                return None;
+            }
+            let num = |v: Value| match v {
+                Value::Int(i) => Some(i as f64),
+                Value::Float(f) => Some(f),
+                _ => None,
+            };
+            let dx = num(a.at(0, None).ok()?)?;
+            let dy = num(a.at(1, None).ok()?)?;
+            *cursor = (cursor.0 + dx, cursor.1 + dy);
+            Some(*cursor)
+        }
+        _ => None,
     }
 }
 
 fn dedup_axis(v: &mut Vec<f64>) {
     v.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
     v.dedup_by(|a, b| (*a - *b).abs() < 1e-6);
+}
+
+/// Grid delta `(dcol, drow)` for a fletcher direction string like "r"/"dr"/"uu".
+fn dir_delta(dir: &str) -> (i64, i64) {
+    let mut dc = 0;
+    let mut dr = 0;
+    for ch in dir.chars() {
+        match ch {
+            'r' => dc += 1,
+            'l' => dc -= 1,
+            'd' => dr += 1,
+            'u' => dr -= 1,
+            _ => {}
+        }
+    }
+    (dc, dr)
 }
 
 /// tikz-cd direction string from grid-index deltas (`dcol`/`drow`). fletcher's
