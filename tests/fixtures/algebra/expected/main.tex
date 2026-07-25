@@ -3,6 +3,8 @@
 \usepackage{amsmath,amssymb}
 \usepackage{mathtools}
 \usepackage{stmaryrd}
+\usepackage{unicode-math}
+\setmathfont{latinmodern-math.otf}
 \usepackage{mathpartir}
 \usepackage{tikz-cd}
 \usepackage{amsthm}
@@ -27,6 +29,7 @@
 \titleformat*{\subsection}{\large\bfseries\headingfont}
 \titleformat*{\subsubsection}{\normalsize\bfseries\headingfont}
 \usepackage{hyperref}
+\setlength{\emergencystretch}{3em}
 \usepackage[paperwidth=612pt,paperheight=792pt]{geometry}
 \usepackage[backend=bibtex]{biblatex}
 \addbibresource{zotero.bib}
@@ -61,7 +64,7 @@ Michael Zhang
 \end{itemize}
 
 
-They all seem to look kind of familiar – a carrier, usually a set, followed by some operations on that carrier, satisfying some axioms. It may be useful to look for an abstraction over all of these.
+They all seem to look kind of familiar -- a carrier, usually a set, followed by some operations on that carrier, satisfying some axioms. It may be useful to look for an abstraction over all of these.
 
 In order to make it easier to think about abstractions for a universal algebra, we'll start by focusing our work in the category of sets \ensuremath{\mathbf{Set}}. So our carrier will be some object in \ensuremath{\mathbf{Set}}.
 
@@ -267,7 +270,7 @@ F\left( X \right) \arrow[r, "{\alpha}"] & X
 \end{center}
 
 
-which is initial in the category of \ensuremath{F}-algebras. Let us "use" this initiality by coming up with another \ensuremath{F}-algebra to map this to. We will use \ensuremath{!} to denote the catamorphism – the unique morphism out of the initial \ensuremath{F}-algebra.
+which is initial in the category of \ensuremath{F}-algebras. Let us "use" this initiality by coming up with another \ensuremath{F}-algebra to map this to. We will use \ensuremath{!} to denote the catamorphism -- the unique morphism out of the initial \ensuremath{F}-algebra.
 
 
 \begin{center}
@@ -328,7 +331,7 @@ F\left( F\left( X \right) \right) \arrow[r, "{F\left( \alpha \right)}"'] & F\lef
 \end{center}
 
 
-We know that \ensuremath{F\left( \alpha \right) \circ F\left( ! \right) = ! \circ \alpha}. Therefore, \ensuremath{! \circ \alpha = {\mathsf{id}}_{F\left( X \right)}}, and \ensuremath{\alpha} is an isomorphism with inverse \ensuremath{!}.  ⁠ \ensuremath{\square}
+We know that \ensuremath{F\left( \alpha \right) \circ F\left( ! \right) = ! \circ \alpha}. Therefore, \ensuremath{! \circ \alpha = {\mathsf{id}}_{F\left( X \right)}}, and \ensuremath{\alpha} is an isomorphism with inverse \ensuremath{!}.  ~\ensuremath{\square}
 
 Since \ensuremath{\alpha} is essentially defining the "constructors" of the inductive type defined by \ensuremath{F\left( X \right)}, one consequence of Lambek's theorem is that all constructors are invertible. For example, we can derive an inverse \ensuremath{\mathsf{suc}} function that takes any \ensuremath{\mathsf{suc}\left( n \right)} and produces \ensuremath{n}.
 
@@ -416,7 +419,7 @@ Recall that a terminal object has morphisms into it from every other object. The
 
 We can use \ref{lambekCoalgebra} to derive what the terminal coalgebra should look like. Starting with \ensuremath{X \cong A \times X}, we can unfold several times to get \ensuremath{X \cong A \times A \times A \times \ldots}. This is an unending product of \ensuremath{A} by itself, which is the same as the function space \ensuremath{\mathbb{N} \rightarrow A}. We can also write this as \ensuremath{{A}^{\mathbb{N} }}, using exponential notation for functions.
 
-Next is to define the structure map, \ensuremath{{\nu }_{X} : X \rightarrow A \times X}. Of course, we don't really have a choice in this matter either – it must follow from the terminality conditions. An obvious choice would be to just pick the head and tail and return that as a pair.
+Next is to define the structure map, \ensuremath{{\nu }_{X} : X \rightarrow A \times X}. Of course, we don't really have a choice in this matter either -- it must follow from the terminality conditions. An obvious choice would be to just pick the head and tail and return that as a pair.
 
 \begin{definition}
 The structure map for the terminal \ensuremath{F}-coalgebra defined by \ensuremath{F\left( X \right) = A \times X} is \[
@@ -465,7 +468,7 @@ This requires us to show that \ensuremath{{\nu }_{Y}} indeed produces the head e
 \end{aligned}
 \]
 
-As noted above, \ensuremath{{y}_{1}} is just the next sequence after \ensuremath{y}, so it will produce \ensuremath{{a}_{1}, {a}_{2}, \ldots} by \ensuremath{f}. So this commuting square checks out.  ⁠ \ensuremath{\square}
+As noted above, \ensuremath{{y}_{1}} is just the next sequence after \ensuremath{y}, so it will produce \ensuremath{{a}_{1}, {a}_{2}, \ldots} by \ensuremath{f}. So this commuting square checks out.  ~\ensuremath{\square}
 
 \begin{lemma}
 The morphism \ensuremath{f} defined in \ref{fExists} is unique.
@@ -485,12 +488,12 @@ Y \arrow[r, "{{\nu }_{Y}}"] \arrow[d, "{g}"] & A \times Y \arrow[d, "{\mathsf{id
 
 Then, regarding the tail end of the sequence, we would like to argue coinductively that it must follow the same shape. Specifically, let \ensuremath{{\nu }_{Y} \left( y \right) = \left( {a}_{0}, {y}^{'} \right)}. Following the top-right path, we can see that the tail part of the result is \ensuremath{g\left( {y}^{'} \right)}. Since \ensuremath{g} is unknown, we can't really say what this is yet, but we can look at the left-bottom path, which tells us that the tail part of the result must be \ensuremath{\mathsf{tail}\left( g\left( y \right) \right)}, since as a reminder, our \ensuremath{{\nu }_{X}} specifically splits a sequence \ensuremath{{A}^{\mathbb{N} }} into its \ensuremath{\mathsf{head}} and \ensuremath{\mathsf{tail}} parts. This tells us that \ensuremath{g\left( {y}^{'} \right) = \mathsf{tail}\left( g\left( y \right) \right)}, which is exactly what we expect.
 
-So putting this together with \ensuremath{f}, we know that both \ensuremath{\mathsf{head}\left( f\left( y \right) \right)} and \ensuremath{\mathsf{head}\left( g\left( y \right) \right)} result in \ensuremath{\mathsf{fst}\left( {\nu }_{Y} \left( y \right) \right)}. So \ensuremath{f\left( y \right)} and \ensuremath{g\left( y \right)} agree on that part. For the tail segment, we know that \ensuremath{\mathsf{tail}\left( g\left( y \right) \right) = g\left( {y}^{'} \right)}. It turns out this is also true of \ensuremath{f}, due to how we defined it: \ensuremath{\mathsf{tail}\left( f\left( y \right) \right) = f\left( {y}^{'} \right)}. Thus, to determine if \ensuremath{\mathsf{tail}\left( f\left( y \right) \right) = \mathsf{tail}\left( g\left( y \right) \right)}, it suffices to show that \ensuremath{f\left( {y}^{'} \right) = g\left( {y}^{'} \right)}. But since \ensuremath{{y}^{'}} is exactly self-similar to \ensuremath{y}, by coinduction, we know that \ensuremath{f\left( {y}^{'} \right) = g\left( {y}^{'} \right)}.  ⁠ \ensuremath{\square}
+So putting this together with \ensuremath{f}, we know that both \ensuremath{\mathsf{head}\left( f\left( y \right) \right)} and \ensuremath{\mathsf{head}\left( g\left( y \right) \right)} result in \ensuremath{\mathsf{fst}\left( {\nu }_{Y} \left( y \right) \right)}. So \ensuremath{f\left( y \right)} and \ensuremath{g\left( y \right)} agree on that part. For the tail segment, we know that \ensuremath{\mathsf{tail}\left( g\left( y \right) \right) = g\left( {y}^{'} \right)}. It turns out this is also true of \ensuremath{f}, due to how we defined it: \ensuremath{\mathsf{tail}\left( f\left( y \right) \right) = f\left( {y}^{'} \right)}. Thus, to determine if \ensuremath{\mathsf{tail}\left( f\left( y \right) \right) = \mathsf{tail}\left( g\left( y \right) \right)}, it suffices to show that \ensuremath{f\left( {y}^{'} \right) = g\left( {y}^{'} \right)}. But since \ensuremath{{y}^{'}} is exactly self-similar to \ensuremath{y}, by coinduction, we know that \ensuremath{f\left( {y}^{'} \right) = g\left( {y}^{'} \right)}.  ~\ensuremath{\square}
 
 In the above proof, we used function extensionality to show that \ensuremath{f} and \ensuremath{g} are equal. But for showing two coalgebra are "the same," it is often more convenient to use a weaker notion of equivalence. A classic example is of automata, which we will see more about in a later section. It is completely sensical to have two automata that capture the same language (yielding the same transitions), yet have different non-reconcilable states. For this, we will introduce bisimulation.
 
 \begin{definition}[Bisimulation of streams]
- Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be \ensuremath{F}-coalgebras, where \ensuremath{F\left( X \right) = A \times X}. Let \ensuremath{R} be a relation between \ensuremath{X} and \ensuremath{Y} – specifically, \ensuremath{R \subset X \times Y}. \ensuremath{R} is a \textbf{bisimulation} iff for any \ensuremath{\left( x, y \right) \in R}:
+ Let \ensuremath{\left( X, {\nu }_{X} \right)} and \ensuremath{\left( Y, {\nu }_{Y} \right)} be \ensuremath{F}-coalgebras, where \ensuremath{F\left( X \right) = A \times X}. Let \ensuremath{R} be a relation between \ensuremath{X} and \ensuremath{Y} -- specifically, \ensuremath{R \subset X \times Y}. \ensuremath{R} is a \textbf{bisimulation} iff for any \ensuremath{\left( x, y \right) \in R}:
 
 \[
 \mathsf{head}\left( x \right) = \mathsf{head}\left( y \right) \land \left( \mathsf{tail}\left( x \right), \mathsf{tail}\left( y \right) \right) \in R
@@ -572,7 +575,7 @@ The double-circle means that \ensuremath{{q}_{2}} is a final state, in other wor
 
 Formally, a language \ensuremath{\mathcal{L}} is just a series of strings consisting of symbols in the alphabet \ensuremath{\Sigma}. An automaton \textbf{recognizes} a language if for every string \ensuremath{s} in the language, running \ensuremath{s} through the automaton would result in a final state.
 
-There is also a variant which allows non-deterministic transitions – for example, it would be allowed to have multiple arrows from the same state with the same transition. This machine is known as a \emph{non-deterministic} automaton.
+There is also a variant which allows non-deterministic transitions -- for example, it would be allowed to have multiple arrows from the same state with the same transition. This machine is known as a \emph{non-deterministic} automaton.
 
 \begin{definition}[Non-deterministic automaton]
  For some alphabet \ensuremath{\Sigma}, a \textbf{non-deterministic automaton} is a 4-tuple \ensuremath{\left( Q, \delta , i, F \right)}: \begin{itemize}
@@ -638,7 +641,7 @@ Thus, we can form a category of DAs:
 \end{definition}
 
 
-It's important that the category itself is parameterized by a language \ensuremath{\mathcal{L}}, since morphisms need to preserve the language. If this was not the case, then we could not have initial or final objects at all – it would essentially require that all automata at all recognize the same language, which is not the case. Such a category would still exist, and in fact \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} is a subcategory of that category, but it is not useful to us.
+It's important that the category itself is parameterized by a language \ensuremath{\mathcal{L}}, since morphisms need to preserve the language. If this was not the case, then we could not have initial or final objects at all -- it would essentially require that all automata at all recognize the same language, which is not the case. Such a category would still exist, and in fact \ensuremath{{\mathsf{DA}}_{\mathcal{L}}} is a subcategory of that category, but it is not useful to us.
 
  Remark We can characterize a DA categorically as \emph{both} and algebra and as a coalgebra. As an algebra, it uses the signature functor
 
@@ -646,7 +649,7 @@ It's important that the category itself is parameterized by a language \ensurema
 F\left( Q \right) = 1 + \Sigma \times Q
 \]
 
-In order to represent an automata as an algebra, we would need a structure map of type \ensuremath{\alpha : 1 + \Sigma \times Q \rightarrow Q}. The \ensuremath{1 \rightarrow Q} part represents the initial state, since it takes no input, and \ensuremath{\Sigma \times Q \rightarrow Q} is the type of a transition map – it takes a transition symbol, a state, and outputs the next state.
+In order to represent an automata as an algebra, we would need a structure map of type \ensuremath{\alpha : 1 + \Sigma \times Q \rightarrow Q}. The \ensuremath{1 \rightarrow Q} part represents the initial state, since it takes no input, and \ensuremath{\Sigma \times Q \rightarrow Q} is the type of a transition map -- it takes a transition symbol, a state, and outputs the next state.
 
 As a coalgebra, it can be characterized with the signature functor:
 
@@ -665,7 +668,7 @@ Formally, let's define this automaton:
 
 \begin{definition}[Initial object of \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}]
  Define the initial automaton \ensuremath{\mathsf{Init}} as: \begin{itemize}
-\item \ensuremath{{Q}_{\mathsf{Init}}} is defined as \ensuremath{{\Sigma }^{∗}}, the set of all strings over the alphabet \ensuremath{\Sigma}
+\item \ensuremath{{Q}_{\mathsf{Init}}} is defined as \ensuremath{{\Sigma }^{\ast }}, the set of all strings over the alphabet \ensuremath{\Sigma}
 \item \ensuremath{{\delta }_{\mathsf{Init}} : Q \times \Sigma \rightarrow Q} simply concatenates the currently running state's string with the transition symbol
 \item \ensuremath{{i}_{\mathsf{Init}}} is the state corresponding to the empty string
 \item \ensuremath{{F}_{\mathsf{Init}}} are the states corresponding to all strings in \ensuremath{\mathcal{L}}
@@ -683,17 +686,17 @@ The automaton described above is initial in \ensuremath{{\mathsf{DA}}_{\mathcal{
 
 \emph{Proof}.  Consider some other automaton \ensuremath{\left( {Q}^{'}, {\delta }^{'}, {i}^{'}, {F}^{'} \right)}. We must define a morphism from \ensuremath{\mathsf{Init}} to this automaton.
 
-First, define \ensuremath{f : {Q}_{\mathsf{Init}} \rightarrow {Q}^{'}}. For every state \ensuremath{q \in {Q}_{\mathsf{Init}}}, there is a corresponding string \ensuremath{s \in {\Sigma }^{∗}}. We will define \ensuremath{f} to map \ensuremath{s} to a state in \ensuremath{{Q}^{'}} by running \ensuremath{{Q}^{'}} – in other words, starting with \ensuremath{{i}^{'}} and transforming it using \ensuremath{{\delta }^{'}} on each symbol of \ensuremath{s}, and then returning the final state that it landed in.
+First, define \ensuremath{f : {Q}_{\mathsf{Init}} \rightarrow {Q}^{'}}. For every state \ensuremath{q \in {Q}_{\mathsf{Init}}}, there is a corresponding string \ensuremath{s \in {\Sigma }^{\ast }}. We will define \ensuremath{f} to map \ensuremath{s} to a state in \ensuremath{{Q}^{'}} by running \ensuremath{{Q}^{'}} -- in other words, starting with \ensuremath{{i}^{'}} and transforming it using \ensuremath{{\delta }^{'}} on each symbol of \ensuremath{s}, and then returning the final state that it landed in.
 
 We must show that \ensuremath{f} commutes with the transition map, or in other words, for any symbol \ensuremath{t \in \Sigma}: \[
 f \circ {\delta }_{\mathsf{Init}} \left( -, t \right) = {\delta }^{'} \left( -, t \right) \circ f
-\] Let \ensuremath{q \in {Q}_{\mathsf{Init}}} be an arbitrary state in \ensuremath{\mathsf{Init}}, and \ensuremath{s \in {\Sigma }^{∗}} be the corresponding string. Then, we are trying to show that \ensuremath{f\left( {\delta }_{\mathsf{Init}} \left( q, t \right) \right) = {\delta }^{'}\left( f\left( q \right), t \right)}. Since \ensuremath{{\delta }_{\mathsf{Init}}} is defined by concatenation, we have \ensuremath{f\left( {\delta }_{\mathsf{Init}} \left( q, t \right) \right) = f\left( s + t \right)} on the left side. Since \ensuremath{f} simply runs \ensuremath{{\delta }^{'}} iteratively, this is actually true \emph{by the definition} of \ensuremath{f}.
+\] Let \ensuremath{q \in {Q}_{\mathsf{Init}}} be an arbitrary state in \ensuremath{\mathsf{Init}}, and \ensuremath{s \in {\Sigma }^{\ast }} be the corresponding string. Then, we are trying to show that \ensuremath{f\left( {\delta }_{\mathsf{Init}} \left( q, t \right) \right) = {\delta }^{'}\left( f\left( q \right), t \right)}. Since \ensuremath{{\delta }_{\mathsf{Init}}} is defined by concatenation, we have \ensuremath{f\left( {\delta }_{\mathsf{Init}} \left( q, t \right) \right) = f\left( s + t \right)} on the left side. Since \ensuremath{f} simply runs \ensuremath{{\delta }^{'}} iteratively, this is actually true \emph{by the definition} of \ensuremath{f}.
 
 It is trivial to show that \ensuremath{f} also preserves the initial and final states.
 
-In order to show \ensuremath{f} is the unique such morphism, assume \ensuremath{g : {Q}_{\mathsf{Init}} \rightarrow {Q}^{'}}. We need to show for any state \ensuremath{q}, that \ensuremath{f\left( q \right) = g\left( q \right)}. Since the states map one-to-one with all strings \ensuremath{{\Sigma }^{∗}}, perform induction on strings. For the empty string, the corresponding state is the initial state, which is preserved by the requirement of the automaton morphism. Thus, \ensuremath{f\left( {i}_{\mathsf{Init}} \right) = g\left( {i}_{\mathsf{Init}} \right) = {i}^{'}}.
+In order to show \ensuremath{f} is the unique such morphism, assume \ensuremath{g : {Q}_{\mathsf{Init}} \rightarrow {Q}^{'}}. We need to show for any state \ensuremath{q}, that \ensuremath{f\left( q \right) = g\left( q \right)}. Since the states map one-to-one with all strings \ensuremath{{\Sigma }^{\ast }}, perform induction on strings. For the empty string, the corresponding state is the initial state, which is preserved by the requirement of the automaton morphism. Thus, \ensuremath{f\left( {i}_{\mathsf{Init}} \right) = g\left( {i}_{\mathsf{Init}} \right) = {i}^{'}}.
 
-For the inductive case, assume \ensuremath{f\left( q \right) = g\left( q \right)}. Then, for any symbol \ensuremath{t \in \Sigma}, identify the state corresponding to concatenating \ensuremath{s + t} (once again letting \ensuremath{s} be the string corresponding to \ensuremath{q}). We must show \ensuremath{f\left( s + t \right) = g\left( s + t \right)}. By the commutative square, we can rewrite this property to \ensuremath{{\delta }^{'}\left( f\left( q \right), t \right) = {\delta }^{'}\left( g\left( q \right), t \right)}. Since \ensuremath{f\left( q \right) = g\left( q \right)} by our inductive hypothesis, the two sides are identical.  ⁠ \ensuremath{\square}
+For the inductive case, assume \ensuremath{f\left( q \right) = g\left( q \right)}. Then, for any symbol \ensuremath{t \in \Sigma}, identify the state corresponding to concatenating \ensuremath{s + t} (once again letting \ensuremath{s} be the string corresponding to \ensuremath{q}). We must show \ensuremath{f\left( s + t \right) = g\left( s + t \right)}. By the commutative square, we can rewrite this property to \ensuremath{{\delta }^{'}\left( f\left( q \right), t \right) = {\delta }^{'}\left( g\left( q \right), t \right)}. Since \ensuremath{f\left( q \right) = g\left( q \right)} by our inductive hypothesis, the two sides are identical.  ~\ensuremath{\square}
 
 \emph{Alternate proof}.  Note that automata behave algebraically. Use \ref{lambekTheorem} to deduce that the structure map \ensuremath{1 + \Sigma \times Q \rightarrow Q} must be an isomorphism, so:
 
@@ -701,11 +704,11 @@ For the inductive case, assume \ensuremath{f\left( q \right) = g\left( q \right)
 Q \cong 1 + \Sigma \times Q
 \]
 
-Expanding this, we get: \ensuremath{Q \cong 1 + \Sigma \times \left( 1 + \Sigma \times \left( 1 + \Sigma \times \ldots \right) \right)}, which simplifies to \ensuremath{1 + \Sigma + {\Sigma }^{2} + {\Sigma }^{3} \ldots}. This is exactly \ensuremath{{\Sigma }^{∗}} – all strings of all lengths, sourced from the alphabet. \footnote{ In fact, this approach can be used to derive the initial automaton. I didn't realize this until after I wrote the previous proof\ldots{} However, I left the original proof in, because it actually defines the function needed for the morphism. }  ⁠ \ensuremath{\square}
+Expanding this, we get: \ensuremath{Q \cong 1 + \Sigma \times \left( 1 + \Sigma \times \left( 1 + \Sigma \times \ldots \right) \right)}, which simplifies to \ensuremath{1 + \Sigma + {\Sigma }^{2} + {\Sigma }^{3} \ldots}. This is exactly \ensuremath{{\Sigma }^{\ast }} -- all strings of all lengths, sourced from the alphabet. \footnote{ In fact, this approach can be used to derive the initial automaton. I didn't realize this until after I wrote the previous proof\ldots{} However, I left the original proof in, because it actually defines the function needed for the morphism. }  ~\ensuremath{\square}
 
-The rough design of this morphism is that for some arbitrary automaton \ensuremath{Q}, we're running every possible string in \ensuremath{{\Sigma }^{∗}} to see which states are able to be reached via \ensuremath{Q}, and capturing that in a single function \ensuremath{f}.
+The rough design of this morphism is that for some arbitrary automaton \ensuremath{Q}, we're running every possible string in \ensuremath{{\Sigma }^{\ast }} to see which states are able to be reached via \ensuremath{Q}, and capturing that in a single function \ensuremath{f}.
 
-We're interested specifically in automata where every state is reachable. This means there's no redundancies in the states – if you had some redundant state that isn't final, then only running \ensuremath{\delta} until completion would completely miss that state, excluding it from the image of the morphism out of the initial automaton. We capture this with the following definition:
+We're interested specifically in automata where every state is reachable. This means there's no redundancies in the states -- if you had some redundant state that isn't final, then only running \ensuremath{\delta} until completion would completely miss that state, excluding it from the image of the morphism out of the initial automaton. We capture this with the following definition:
 
 \begin{definition}[Reachable automaton]
  An automaton \ensuremath{Q} is \textbf{reachable} if the unique morphism out of the initial automaton \ensuremath{\mathsf{Init} \rightarrow Q} is an epimorphism. 
@@ -718,7 +721,7 @@ There is a similar construction on the coalgebraic side. We can imagine a termin
 
 \begin{definition}[Terminal object in \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}]
  The terminal automaton \ensuremath{\mathsf{Term}} is defined as: \begin{itemize}
-\item \ensuremath{{Q}_{\mathsf{Term}}} is the set of all possible subsets of \ensuremath{{\Sigma }^{∗}}. This represents all languages that could possibly be recognized for this alphabet.
+\item \ensuremath{{Q}_{\mathsf{Term}}} is the set of all possible subsets of \ensuremath{{\Sigma }^{\ast }}. This represents all languages that could possibly be recognized for this alphabet.
 \item \ensuremath{{\delta }_{\mathsf{Term}} : Q \times \Sigma \rightarrow Q} maps every \ensuremath{\left( q, s \right) \in Q \times \Sigma} to the state representing the remainder of the language after consuming the prefix \ensuremath{s}. This is also known as the \emph{Brzozowski derivative}.
 \item \ensuremath{{i}_{\mathsf{Term}}} is the language \ensuremath{\mathcal{L}}.
 \item \ensuremath{{F}_{\mathsf{Term}}} is the set of all languages that contain the empty string \ensuremath{\epsilon}.
@@ -734,11 +737,11 @@ The automaton described above is final in \ensuremath{{\mathsf{DA}}_{\mathcal{L}
 \end{theorem}
 
 
-\emph{Proof}. This proof largely follows in the same vein as the initial object proof. As such, we will skip some parts of it for brevity. Just trust me 😉.
+\emph{Proof}. This proof largely follows in the same vein as the initial object proof. As such, we will skip some parts of it for brevity. Just trust me .
 
-Consider some other automaton \ensuremath{\left( {Q}^{'}, {\delta }^{'}, {i}^{'}, {F}^{'} \right)}. We'll now define \ensuremath{f : {Q}^{'} \rightarrow {Q}_{\mathsf{Term}}}. For any state \ensuremath{q \in {Q}^{'}}, we will consider the automaton that has the same states and transitions as \ensuremath{{Q}^{'}}, but with initial state \ensuremath{q}. The language that this automaton recognizes will be a set of a strings, which is a subset of \ensuremath{{2}^{{\Sigma }^{∗}}}. This language is the output of \ensuremath{f}.
+Consider some other automaton \ensuremath{\left( {Q}^{'}, {\delta }^{'}, {i}^{'}, {F}^{'} \right)}. We'll now define \ensuremath{f : {Q}^{'} \rightarrow {Q}_{\mathsf{Term}}}. For any state \ensuremath{q \in {Q}^{'}}, we will consider the automaton that has the same states and transitions as \ensuremath{{Q}^{'}}, but with initial state \ensuremath{q}. The language that this automaton recognizes will be a set of a strings, which is a subset of \ensuremath{{2}^{{\Sigma }^{\ast }}}. This language is the output of \ensuremath{f}.
 
-The exercise of verifying that \ensuremath{f} preserves the initial and final states as well as the transition map is left to the reader.  ⁠ \ensuremath{\square}
+The exercise of verifying that \ensuremath{f} preserves the initial and final states as well as the transition map is left to the reader.  ~\ensuremath{\square}
 
 \begin{exercise}
 Verify that \ensuremath{f} satisfies the requirements for being a \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}-morphism.
@@ -753,11 +756,11 @@ Q \cong 2 \times {Q}^{\Sigma }
 
 Expanding this, we get \[
 \begin{aligned}
-Q & \cong 2 \times {\left( 2 \times {\left( 2 \times {\left( \ldots \right)}^{\Sigma } \right)}^{\Sigma } \right)}^{\Sigma } \\ & = 2 \times {2}^{\Sigma } \times {\left( 2 \times {\left( \ldots \right)}^{\Sigma } \right)}^{{\Sigma }^{2}} \\ & = 2 \times {2}^{\Sigma } \times {2}^{{\Sigma }^{2}} \times {\left( \ldots \right)}^{{\Sigma }^{3}} \\ & = 2 \times {2}^{\Sigma } \times {2}^{{\Sigma }^{2}} \times {2}^{{\Sigma }^{3}} \times \ldots \\ & = {2}^{1 + \Sigma + {\Sigma }^{2} + {\Sigma }^{3} + \ldots } \\ & = {2}^{{\Sigma }^{∗}}
+Q & \cong 2 \times {\left( 2 \times {\left( 2 \times {\left( \ldots \right)}^{\Sigma } \right)}^{\Sigma } \right)}^{\Sigma } \\ & = 2 \times {2}^{\Sigma } \times {\left( 2 \times {\left( \ldots \right)}^{\Sigma } \right)}^{{\Sigma }^{2}} \\ & = 2 \times {2}^{\Sigma } \times {2}^{{\Sigma }^{2}} \times {\left( \ldots \right)}^{{\Sigma }^{3}} \\ & = 2 \times {2}^{\Sigma } \times {2}^{{\Sigma }^{2}} \times {2}^{{\Sigma }^{3}} \times \ldots \\ & = {2}^{1 + \Sigma + {\Sigma }^{2} + {\Sigma }^{3} + \ldots } \\ & = {2}^{{\Sigma }^{\ast }}
 \end{aligned}
 \]
 
-Thus, \ensuremath{{2}^{{\Sigma }^{∗}}} is the state space for the terminal automaton.  ⁠ \ensuremath{\square}
+Thus, \ensuremath{{2}^{{\Sigma }^{\ast }}} is the state space for the terminal automaton.  ~\ensuremath{\square}
 
 The rough design for this morphism is that we're mapping the automaton to what language it recognizes, inside of \ensuremath{\mathsf{Term}}. In that sense, this morphism would capture the behavior of all the strings that could possibly be recognized by the automaton.
 
@@ -779,7 +782,7 @@ Putting these together, we can finally define what a minimal automaton is:
 
 The reachability property enforces that no states can be deleted, and the observability property enforces that no states can be merged, at least without changing the language being recognized. These are the only two ways to reduce an automaton without changing the language. This claim could be justified by the fact that the definition of minimization used above coincides with the minimization definition for a coalgebra defined through epi-mono factorization \cite{bezhanishviliMinimizationDuality2012}.
 
-On the computation side of things, reachability is pretty trivial to compute algorithmically – just traverse the state machine and grab all the states visited. On the other hand, observability requires quotienting by equivalence classes of a hard-to-compute property of basically \emph{every} state. In practice, algorithms such as Hopcroft's algorithm optimize this by incrementally comparing states and quotienting as you go.
+On the computation side of things, reachability is pretty trivial to compute algorithmically -- just traverse the state machine and grab all the states visited. On the other hand, observability requires quotienting by equivalence classes of a hard-to-compute property of basically \emph{every} state. In practice, algorithms such as Hopcroft's algorithm optimize this by incrementally comparing states and quotienting as you go.
 
 \subsection{Reversing automata}
 
@@ -826,30 +829,30 @@ Here is where the magic happens. The function \ensuremath{{\delta }_{Q}} is esse
 
 Let's step back one step and build up to this insight. If we just considered the category of sets \ensuremath{\mathbf{Set}}, the \emph{powerset functor} \ensuremath{\mathcal{P} : \mathbf{Set} \rightarrow \mathbf{Set}} maps every set \ensuremath{X} to its power set \ensuremath{\mathcal{P}\left( X \right)}. In particular, for morphisms, it has type \ensuremath{\mathcal{P}\left( X \xrightarrow{f} Y \right) : \mathcal{P}\left( X \right) \rightarrow \mathcal{P}\left( Y \right)}. For any subset of \ensuremath{X}, it maps \ensuremath{f} restricted to that subset to obtain an image that is in the subset of \ensuremath{Y}.
 
-There is also a contravariant version, which we will denote \ensuremath{{\mathcal{P}}^{∗} : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. In particular, the action on morphisms has type \ensuremath{{\mathcal{P}}^{∗} \left( X \xrightarrow{f} Y \right) : \mathcal{P}\left( Y \right) \rightarrow \mathcal{P}\left( X \right)}. This action maps a subset of \ensuremath{Y} into the \emph{pre-image} under \ensuremath{f}, which is a subset of \ensuremath{X}.
+There is also a contravariant version, which we will denote \ensuremath{{\mathcal{P}}^{\ast } : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. In particular, the action on morphisms has type \ensuremath{{\mathcal{P}}^{\ast } \left( X \xrightarrow{f} Y \right) : \mathcal{P}\left( Y \right) \rightarrow \mathcal{P}\left( X \right)}. This action maps a subset of \ensuremath{Y} into the \emph{pre-image} under \ensuremath{f}, which is a subset of \ensuremath{X}.
 
 This is exactly what our \ensuremath{{\delta }_{{Q}^{'}}} is doing! In essence, our desired transformation is performing the covariant powerset functor on each of the components of the automata. We can concretize this idea by constructing a forgetful functor \ensuremath{U : {\mathsf{DA}}_{\mathcal{L}} \rightarrow \mathbf{Set}} which simply takes the set of states and forgets all the other structure. Then, we can see clearly that:
 
 \[
-U\left( Q \right) \xrightarrow{{\mathcal{P}}^{∗}} U\left( {Q}^{'} \right)
+U\left( Q \right) \xrightarrow{{\mathcal{P}}^{\ast }} U\left( {Q}^{'} \right)
 \]
 
 Here we introduce a powerful property of the contravariant powerset functor:
 
 \begin{lemma}
-The contravariant powerset functor \ensuremath{{\mathcal{P}}^{∗}} is left adjoint to its own opposite functor \ensuremath{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}.
+The contravariant powerset functor \ensuremath{{\mathcal{P}}^{\ast }} is left adjoint to its own opposite functor \ensuremath{{{\mathcal{P}}^{\ast }}^{\mathsf{op}}}.
 \end{lemma}
 \label{contrPowerSetSelfDual} 
 
-\emph{Proof}.  The contravariant powerset functor is \ensuremath{{\mathcal{P}}^{∗} : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. Its opposite functor would be \ensuremath{{{\mathcal{P}}^{∗}}^{\mathsf{op}} : \mathbf{Set} \rightarrow {\mathbf{Set}}^{\mathsf{op}}}. This amounts to showing that for any \ensuremath{X, Y \in \mathbf{Set}}:
+\emph{Proof}.  The contravariant powerset functor is \ensuremath{{\mathcal{P}}^{\ast } : {\mathbf{Set}}^{\mathsf{op}} \rightarrow \mathbf{Set}}. Its opposite functor would be \ensuremath{{{\mathcal{P}}^{\ast }}^{\mathsf{op}} : \mathbf{Set} \rightarrow {\mathbf{Set}}^{\mathsf{op}}}. This amounts to showing that for any \ensuremath{X, Y \in \mathbf{Set}}:
 
 \[
 \begin{aligned}
-{\mathbf{Hom}}_{\mathbf{Set}} \left( {\mathcal{P}}^{∗} \left( X \right), Y \right) & \cong {\mathbf{Hom}}_{\mathbf{Set}} \left( X, {{\mathcal{P}}^{∗}}^{\mathsf{op}}\left( Y \right) \right) \\ {\mathbf{Hom}}_{\mathbf{Set}} \left( Y, {\mathcal{P}}^{∗}\left( X \right) \right) & \cong {\mathbf{Hom}}_{\mathbf{Set}} \left( X, {{\mathcal{P}}^{∗}}^{\mathsf{op}}\left( Y \right) \right)
+{\mathbf{Hom}}_{\mathbf{Set}} \left( {\mathcal{P}}^{\ast } \left( X \right), Y \right) & \cong {\mathbf{Hom}}_{\mathbf{Set}} \left( X, {{\mathcal{P}}^{\ast }}^{\mathsf{op}}\left( Y \right) \right) \\ {\mathbf{Hom}}_{\mathbf{Set}} \left( Y, {\mathcal{P}}^{\ast }\left( X \right) \right) & \cong {\mathbf{Hom}}_{\mathbf{Set}} \left( X, {{\mathcal{P}}^{\ast }}^{\mathsf{op}}\left( Y \right) \right)
 \end{aligned}
 \]
 
-and really, both \ensuremath{{\mathcal{P}}^{∗}} and \ensuremath{\operatorname{{\mathcal{P}}^{∗}}} have the same action on sets, which is to turn them into their power sets. So really, we are trying to show:
+and really, both \ensuremath{{\mathcal{P}}^{\ast }} and \ensuremath{\operatorname{{\mathcal{P}}^{\ast }}} have the same action on sets, which is to turn them into their power sets. So really, we are trying to show:
 
 \[
 \begin{aligned}
@@ -875,7 +878,7 @@ and the other way:
 \begin{aligned}
 \forall g . g & = \mathsf{fwd}\left( \mathsf{bwd}\left( g \right) \right) \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in \mathsf{bwd}\left( g \right)\left( y \right) \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in \left( \lambda \left( y : Y \right) . \left\{ x \in X \mid y \in g\left( x \right) \right\} \right)\left( y \right) \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid x \in \left\{ x \in X \mid y \in g\left( x \right) \right\} \right\} \\ & = \lambda \left( x : X \right) . \left\{ y \in Y \mid y \in g\left( x \right) \right\} \\ & = \lambda \left( x : X \right) . g\left( x \right) \\ & = g \\
 \end{aligned}
-\]  ⁠ \ensuremath{\square}
+\]  ~\ensuremath{\square}
 
 \ref{contrPowerSetSelfDual} is essentially saying that the contravariant powerset functor is self-dual. The strategy now is: if we can somehow lift this self-duality into \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}, we will be able to get an operation that turns reachable automata into observable automata and vice versa.
 
@@ -886,13 +889,13 @@ We will devise a functor called \ensuremath{\overline{2}}, which is self-dual, t
 
 \begin{center}
 \begin{tikzcd}
-{\mathsf{DA}}_{\mathcal{L}} \arrow[r, bend left=15, "{\overline{2}}"] \arrow[r, draw=none, "{\perp}"] \arrow[r, bend right=15, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
-\mathbf{Set} \arrow[r, bend left=15, "{{\mathcal{P}}^{∗}}"] \arrow[r, draw=none, "{\perp}"] \arrow[r, leftarrow, bend right=15, "{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
+{\mathsf{DA}}_{\mathcal{L}} \arrow[r, bend left=15, "{\overline{2}}"] \arrow[r, draw=none, "{\bot}"] \arrow[r, bend right=15, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
+\mathbf{Set} \arrow[r, bend left=15, "{{\mathcal{P}}^{\ast }}"] \arrow[r, draw=none, "{\bot}"] \arrow[r, leftarrow, bend right=15, "{{{\mathcal{P}}^{\ast }}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
 \end{tikzcd}
 \end{center}
 
 
-This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{∗}} into \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. The paper \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} notes that this lifting is true generically
+This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{\ast }} into \ensuremath{{\mathsf{DA}}_{\mathcal{L}}}. The paper \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} notes that this lifting is true generically
 
 \begin{definition}[Self-dual powerset functor lift]
  Define the functor \ensuremath{\overline{2} : {\mathsf{DA}}_{\mathcal{L}} \rightarrow {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}}} as:
@@ -911,7 +914,7 @@ This essentially lifts the self-duality of \ensuremath{{\mathcal{P}}^{∗}} into
 \end{definition}
 \label{F2Def} 
 
-\emph{Proof}.  Omitting for brevity. See \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} for the full proof.  ⁠ \ensuremath{\square}
+\emph{Proof}.  Omitting for brevity. See \cite{bonchiAlgebracoalgebraDualityBrzozowskis2014} for the full proof.  ~\ensuremath{\square}
 
 \subsection{(Co-)reflective subcategories}
 
@@ -1019,7 +1022,7 @@ Both triangle inequalities check out, so our adjunction is defined.
 
     
 
-    ⁠ \ensuremath{\square}
+    ~\ensuremath{\square}
 
 Similarly, for \ensuremath{{\mathsf{oDA}}_{\mathcal{L}}}:
 
@@ -1041,7 +1044,7 @@ The corresponding adjoint functor for \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}},
 \begin{center}
 \begin{tikzcd}
 {} & {\mathsf{DA}}_{\mathcal{L}} \arrow[dl, bend left=15, "{R}"] \arrow[dr, bend right=15, "{O}"] & {} \\
-{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\perp}"] \arrow[dr, draw=none, bend right=10, "{⊤}"] \arrow[dr, bend right=30, "{O}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{⊤}"] \arrow[dl, draw=none, bend left=10, "{\perp}"] \arrow[dl, bend left=30, "{R}"] \\
+{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\bot}"] \arrow[dr, draw=none, bend right=10, "{\top}"] \arrow[dr, bend right=30, "{O}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{\top}"] \arrow[dl, draw=none, bend left=10, "{\bot}"] \arrow[dl, bend left=30, "{R}"] \\
 {} & {\mathsf{mDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=15] \arrow[ur, hook, bend left=15] & {}
 \end{tikzcd}
 \end{center}
@@ -1053,7 +1056,7 @@ Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a funct
 \begin{center}
 \begin{tikzcd}
 {} &  \arrow[dl, bend left=15, "{R}"] \arrow[dr, bend right=15, "{O}"] & {} & {} & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[dl, bend left=15, "{{R}^{\mathsf{op}}}"] \arrow[dr, bend right=15, "{{O}^{\mathsf{op}}}"] & {} \\
-{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\perp}"] \arrow[dr, draw=none, bend right=10, "{⊤}"] \arrow[dr, bend right=30, "{O}"] \arrow[rrrrr, bend left=5, "{\overline{2}}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{⊤}"] \arrow[dl, draw=none, bend left=10, "{\perp}"] \arrow[dl, bend left=30, "{R}"] & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\perp}"] \arrow[dr, draw=none, bend right=10, "{⊤}"] \arrow[dr, bend right=30, "{{O}^{\mathsf{op}}}"] & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{⊤}"] \arrow[dl, draw=none, bend left=10, "{\perp}"] \arrow[dl, bend left=30, "{{R}^{\mathsf{op}}}"] \\
+{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\bot}"] \arrow[dr, draw=none, bend right=10, "{\top}"] \arrow[dr, bend right=30, "{O}"] \arrow[rrrrr, bend left=5, "{\overline{2}}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{\top}"] \arrow[dl, draw=none, bend left=10, "{\bot}"] \arrow[dl, bend left=30, "{R}"] & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\bot}"] \arrow[dr, draw=none, bend right=10, "{\top}"] \arrow[dr, bend right=30, "{{O}^{\mathsf{op}}}"] & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{\top}"] \arrow[dl, draw=none, bend left=10, "{\bot}"] \arrow[dl, bend left=30, "{{R}^{\mathsf{op}}}"] \\
 {} &  \arrow[ul, hook, bend right=15] \arrow[ur, hook, bend left=15] & {} & {} & {{\mathsf{mDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook, bend right=15] \arrow[ur, hook, bend left=15] \arrow[lll, bend left=5, "{{\overline{2}}^{\mathsf{op}}}"] & {}
 \end{tikzcd}
 \end{center}
@@ -1072,7 +1075,7 @@ Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a funct
 \end{itemize}
 
 
-Thus, the theorem holds by construction.  ⁠ \ensuremath{\square}
+Thus, the theorem holds by construction.  ~\ensuremath{\square}
 
 
 

@@ -47,9 +47,17 @@ fn escape_text(text: &str) -> String {
             '^' => out.push_str("\\textasciicircum "),
             '~' => out.push_str("\\textasciitilde "),
             '\u{FE0F}' | '\u{FE0E}' => {} // variation selectors: drop
+            // Zero-width / joiner / invisible spaces: drop.
+            '\u{2060}' | '\u{200B}' | '\u{200C}' | '\u{200D}' | '\u{FEFF}' => {}
+            '\u{00A0}' | '\u{202F}' => out.push('~'), // non-breaking spaces
+            '–' => out.push_str("--"),               // en dash
+            '—' => out.push_str("---"),              // em dash
             '\u{2705}' | '\u{2714}' | '\u{2713}' => out.push_str("\\checkmark{}"), // check marks
             '…' => out.push_str("\\ldots{}"),
             '↪' => out.push_str("\\ensuremath{\\hookrightarrow}"),
+            // Emoji: the default text font can't render them; drop rather than
+            // emit a "Missing character" warning.
+            c if ('\u{1F000}'..='\u{1FAFF}').contains(&c) => {}
             _ => out.push(ch),
         }
     }

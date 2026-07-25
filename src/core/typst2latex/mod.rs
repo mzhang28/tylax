@@ -203,6 +203,13 @@ pub fn convert(
         "\\usepackage{amsmath,amssymb}\n",
         "\\usepackage{mathtools}\n",
         "\\usepackage{stmaryrd}\n",
+        // unicode-math (loaded after the AMS/stmaryrd command set) lets any
+        // literal Unicode math character render directly via the OpenType math
+        // font, so the long tail of symbols not in UNICODE_TO_LATEX no longer
+        // triggers "missing character" warnings. Latin Modern Math matches the
+        // Computer Modern look of the surrounding text.
+        "\\usepackage{unicode-math}\n",
+        "\\setmathfont{latinmodern-math.otf}\n",
         "\\usepackage{mathpartir}\n",
         "\\usepackage{tikz-cd}\n",
         "\\usepackage{amsthm}\n",
@@ -229,6 +236,9 @@ pub fn convert(
         "\\titleformat*{\\subsection}{\\large\\bfseries\\headingfont}\n",
         "\\titleformat*{\\subsubsection}{\\normalsize\\bfseries\\headingfont}\n",
         "\\usepackage{hyperref}\n",
+        // Let TeX stretch interword space rather than overflow the margin on
+        // dense math/citation lines (reduces "Overfull \\hbox" warnings).
+        "\\setlength{\\emergencystretch}{3em}\n",
     ).to_string();
 
     // Page geometry: paper size (`#set page(width/height)`) and a uniform

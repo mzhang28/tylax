@@ -453,6 +453,7 @@ fn push_glyph(ch: char, styles: StyleChain, out: &mut String) {
         '−' => "-".to_string(),          // U+2212 minus sign
         '\u{2062}' => return,            // invisible times
         '\u{2061}' => return,            // function application
+        '\u{2060}' | '\u{200B}' | '\u{FEFF}' => return, // word joiner / zero-width
         '\u{FE0E}' | '\u{FE0F}' => return, // variation selectors
         // Literal brace *characters* (Typst math braces are literal, not
         // grouping): escape so they don't act as LaTeX groups.
