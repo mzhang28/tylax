@@ -27,6 +27,9 @@ struct Edge {
     from_name: Option<String>,
     to_name: Option<String>,
     side_right: bool,
+    shift: i64,
+    bend: f64,
+    invisible: bool,
 }
 
 /// Entry point: lower a `fletcher-diagram` marker body to a `tikz-cd`.
@@ -105,6 +108,16 @@ fn parse_edge(dict: &Dict) -> Edge {
         from_name: dict_str(dict, "from-name"),
         to_name: dict_str(dict, "to-name"),
         side_right,
+        shift: match dict.get(&Str::from("shift")).ok() {
+            Some(Value::Int(i)) => *i,
+            _ => 0,
+        },
+        bend: match dict.get(&Str::from("bend")).ok() {
+            Some(Value::Float(f)) => *f,
+            Some(Value::Int(i)) => *i as f64,
+            _ => 0.0,
+        },
+        invisible: matches!(dict.get(&Str::from("invisible")).ok(), Some(Value::Bool(true))),
     }
 }
 
@@ -163,6 +176,18 @@ fn arrow(dir: &str, edge: &Edge, styles: StyleChain, ctx: &mut LowerContext) -> 
     let mut opts: Vec<String> = vec![dir.to_string()];
     if let Some(m) = mark_option(&edge.marks) {
         opts.push(m.to_string());
+    }
+    // `bend`/`shift` separate parallel arrows between the same node pair; an
+    // invisible (`stroke: 0pt`) edge just carries a label.
+    if edge.invisible {
+        opts.push("draw=none".to_string());
+    }
+    if edge.bend.abs() > 0.5 {
+        let side = if edge.bend > 0.0 { "left" } else { "right" };
+        opts.push(format!("bend {}={}", side, edge.bend.abs().round() as i64));
+    } else if edge.shift != 0 {
+        // shift and bend don't combine well; prefer bend when both are present.
+        opts.push(if edge.shift < 0 { "shift left".to_string() } else { "shift right".to_string() });
     }
     if let Some(label) = &edge.label {
         let text = lower_math_fragment(label, styles, ctx);

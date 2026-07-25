@@ -554,7 +554,7 @@ Visually, we can represent an automaton like this:
 
 \begin{center}
 \begin{tikzcd}
-{} \arrow[r, "{start}"] & {q}_{0} \arrow[r, "{b}"] \arrow[rr, "{a}"] & {q}_{1} \arrow[r, "{c}"] \arrow[loop above, "{b}"] & {q}_{2}
+{} \arrow[r, "{start}"] & {q}_{0} \arrow[r, "{b}"] \arrow[rr, bend right=40, "{a}"] & {q}_{1} \arrow[r, "{c}"] \arrow[loop above, bend left=130, "{b}"] & {q}_{2}
 \end{tikzcd}
 \end{center}
 
@@ -594,7 +594,7 @@ For this section, we will consider a particular problem concerning automata: the
 
 \begin{center}
 \begin{tikzcd}
-{q}_{0} \arrow[r, "{a}"] & {q}_{1} \arrow[r, "{a}"] & {q}_{2} \arrow[r, "{a}"] & {q}_{3} \arrow[lll, "{a}"]
+{q}_{0} \arrow[r, "{a}"] & {q}_{1} \arrow[r, "{a}"] & {q}_{2} \arrow[r, "{a}"] & {q}_{3} \arrow[lll, bend right=30, "{a}"]
 \end{tikzcd}
 \end{center}
 
@@ -886,8 +886,8 @@ We will devise a functor called \ensuremath{\overline{2}}, which is self-dual, t
 
 \begin{center}
 \begin{tikzcd}
-{\mathsf{DA}}_{\mathcal{L}} \arrow[r, "{\overline{2}}"] \arrow[r, "{\perp}"] \arrow[r, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
-\mathbf{Set} \arrow[r, "{{\mathcal{P}}^{∗}}"] \arrow[r, "{\perp}"] \arrow[r, leftarrow, "{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
+{\mathsf{DA}}_{\mathcal{L}} \arrow[r, bend left=15, "{\overline{2}}"] \arrow[r, draw=none, "{\perp}"] \arrow[r, bend right=15, "{{\overline{2}}^{\mathsf{op}}}"'] \arrow[d, "{U}"] & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[d, "{U}"] \\
+\mathbf{Set} \arrow[r, bend left=15, "{{\mathcal{P}}^{∗}}"] \arrow[r, draw=none, "{\perp}"] \arrow[r, leftarrow, bend right=15, "{{{\mathcal{P}}^{∗}}^{\mathsf{op}}}"'] & {\mathbf{Set}}^{\mathsf{op}}
 \end{tikzcd}
 \end{center}
 
@@ -1040,9 +1040,9 @@ The corresponding adjoint functor for \ensuremath{{\mathsf{rDA}}_{\mathcal{L}}},
 
 \begin{center}
 \begin{tikzcd}
-{} & {\mathsf{DA}}_{\mathcal{L}} \arrow[dl, "{R}"] \arrow[dr, "{O}"] & {} \\
-{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook] \arrow[ur, "{\perp}"] \arrow[dr, "{⊤}"] \arrow[dr, "{O}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook] \arrow[ul, "{⊤}"] \arrow[dl, "{\perp}"] \arrow[dl, "{R}"] \\
-{} & {\mathsf{mDA}}_{\mathcal{L}} \arrow[ul, hook] \arrow[ur, hook] & {}
+{} & {\mathsf{DA}}_{\mathcal{L}} \arrow[dl, bend left=15, "{R}"] \arrow[dr, bend right=15, "{O}"] & {} \\
+{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\perp}"] \arrow[dr, draw=none, bend right=10, "{⊤}"] \arrow[dr, bend right=30, "{O}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{⊤}"] \arrow[dl, draw=none, bend left=10, "{\perp}"] \arrow[dl, bend left=30, "{R}"] \\
+{} & {\mathsf{mDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=15] \arrow[ur, hook, bend left=15] & {}
 \end{tikzcd}
 \end{center}
 
@@ -1052,9 +1052,9 @@ Finally, due to our self-dual functor \ensuremath{\overline{2}}, we have a funct
 
 \begin{center}
 \begin{tikzcd}
-{} &  \arrow[dl, "{R}"] \arrow[dr, "{O}"] & {} & {} & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[dl, "{{R}^{\mathsf{op}}}"] \arrow[dr, "{{O}^{\mathsf{op}}}"] & {} \\
-{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook] \arrow[ur, "{\perp}"] \arrow[dr, "{⊤}"] \arrow[dr, "{O}"] \arrow[rrrrr, "{\overline{2}}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook] \arrow[ul, "{⊤}"] \arrow[dl, "{\perp}"] \arrow[dl, "{R}"] & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ur, hook] \arrow[ur, "{\perp}"] \arrow[dr, "{⊤}"] \arrow[dr, "{{O}^{\mathsf{op}}}"] & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook] \arrow[ul, "{⊤}"] \arrow[dl, "{\perp}"] \arrow[dl, "{{R}^{\mathsf{op}}}"] \\
-{} &  \arrow[ul, hook] \arrow[ur, hook] & {} & {} & {{\mathsf{mDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook] \arrow[ur, hook] \arrow[lll, "{{\overline{2}}^{\mathsf{op}}}"] & {}
+{} &  \arrow[dl, bend left=15, "{R}"] \arrow[dr, bend right=15, "{O}"] & {} & {} & {{\mathsf{DA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[dl, bend left=15, "{{R}^{\mathsf{op}}}"] \arrow[dr, bend right=15, "{{O}^{\mathsf{op}}}"] & {} \\
+{\mathsf{rDA}}_{\mathcal{L}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\perp}"] \arrow[dr, draw=none, bend right=10, "{⊤}"] \arrow[dr, bend right=30, "{O}"] \arrow[rrrrr, bend left=5, "{\overline{2}}"] & {} & {\mathsf{oDA}}_{\mathcal{L}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{⊤}"] \arrow[dl, draw=none, bend left=10, "{\perp}"] \arrow[dl, bend left=30, "{R}"] & {{\mathsf{rDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ur, hook, bend left=30] \arrow[ur, draw=none, bend left=10, "{\perp}"] \arrow[dr, draw=none, bend right=10, "{⊤}"] \arrow[dr, bend right=30, "{{O}^{\mathsf{op}}}"] & {} & {{\mathsf{oDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook, bend right=30] \arrow[ul, draw=none, bend right=10, "{⊤}"] \arrow[dl, draw=none, bend left=10, "{\perp}"] \arrow[dl, bend left=30, "{{R}^{\mathsf{op}}}"] \\
+{} &  \arrow[ul, hook, bend right=15] \arrow[ur, hook, bend left=15] & {} & {} & {{\mathsf{mDA}}_{\mathsf{rev}\left( \mathcal{L} \right)}}^{\mathsf{op}} \arrow[ul, hook, bend right=15] \arrow[ur, hook, bend left=15] \arrow[lll, bend left=5, "{{\overline{2}}^{\mathsf{op}}}"] & {}
 \end{tikzcd}
 \end{center}
 

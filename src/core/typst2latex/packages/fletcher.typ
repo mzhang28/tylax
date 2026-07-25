@@ -87,6 +87,12 @@
   } else if coords.len() == 1 {
     from = coords.at(0)
   }
+  // Parallel-arrow controls: `shift` (a perpendicular offset) and `bend`
+  // (a curve angle) separate multiple arrows between the same node pair;
+  // `stroke: 0pt` marks an invisible label-only edge.
+  let shift-arg = named.at("shift", default: none)
+  let bend-arg = named.at("bend", default: none)
+  let stroke-arg = named.at("stroke", default: auto)
   [#metadata((
     type: "fletcher-edge",
     dir: dir,
@@ -97,5 +103,8 @@
     from-name: if refs.len() >= 1 { refs.at(0) } else { none },
     to-name: if refs.len() >= 2 { refs.at(1) } else { none },
     side: named.at("label-side", default: none),
+    shift: if type(shift-arg) == length { if shift-arg < 0pt { -1 } else { 1 } } else { 0 },
+    bend: if type(bend-arg) == angle { bend-arg.deg() } else { 0.0 },
+    invisible: stroke-arg == 0pt,
   ))]
 }
